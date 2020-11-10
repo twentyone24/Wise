@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>912770174825-hak5umf23q9bmhjo05gee1eruajtejk7.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.912770174825-hak5umf23q9bmhjo05gee1eruajtejk7</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCOtG6KRuEPqOxKSQg7Et-iNf0keW4kmwc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>912770174825</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.scribble.Wise</string>
+	<key>PROJECT_ID</key>
+	<string>scribble-95308</string>
+	<key>STORAGE_BUCKET</key>
+	<string>scribble-95308.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:912770174825:ios:71cd95f258be697328f7f8</string>
+	<key>DATABASE_URL</key>
+	<string>https://scribble-95308.firebaseio.com</string>
+</dict>
+</plist>
