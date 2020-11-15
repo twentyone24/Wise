@@ -9,24 +9,25 @@ import SwiftUI
 import Firebase
 
 struct ContentView: View {
-
-    @State var status = UserDefaults.standard.value(forKey: "status") as? Bool ?? false
-
+    @AppStorage("log_Status") var status = false
     var body: some View {
-        VStack {
-            if status {
-                Home()
-            } else {
-                LandingPage()
-            }
+
+        ZStack{
             
-        }.onAppear {
-            NotificationCenter.default.addObserver(forName: NSNotification.Name("statusChange"), object: nil, queue: .main) { (_) in
-               let status = UserDefaults.standard.value(forKey: "status") as? Bool ?? false
-                self.status = status
+            if status{
+                
+                Home()
+            }
+            else{
+                
+                NavigationView{
+                    
+                    Login()
+                        .navigationBarHidden(true)
+                        .navigationBarBackButtonHidden(true)
+                }
             }
         }
-       
     }
 }
 
