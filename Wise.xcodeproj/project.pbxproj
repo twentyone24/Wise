@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		673F33542561319700141FF4 /* Student.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F33532561319700141FF4 /* Student.swift */; };
+		673F33892561491600141FF4 /* CardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F33882561491600141FF4 /* CardViews.swift */; };
+		673F33912561724400141FF4 /* SideMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673F33902561724300141FF4 /* SideMenu.swift */; };
 		673FB99C25592A7200C00155 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673FB99B25592A7200C00155 /* AppDelegate.swift */; };
 		673FB99E25592A7200C00155 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673FB99D25592A7200C00155 /* SceneDelegate.swift */; };
 		673FB9A025592A7200C00155 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 673FB99F25592A7200C00155 /* ContentView.swift */; };
@@ -16,6 +19,7 @@
 		6751325C255A5C840067FCDA /* SelcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6751325B255A5C840067FCDA /* SelcView.swift */; };
 		67615BD2255CD29900AEBA1F /* student.json in Resources */ = {isa = PBXBuildFile; fileRef = 67615BD0255CD29900AEBA1F /* student.json */; };
 		67615BD3255CD29A00AEBA1F /* teacher.json in Resources */ = {isa = PBXBuildFile; fileRef = 67615BD1255CD29900AEBA1F /* teacher.json */; };
+		676B6E372560F18B0026E378 /* TeacherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 676B6E362560F18B0026E378 /* TeacherView.swift */; };
 		678EFF2225600AA000A4902B /* DocumentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678EFF2125600AA000A4902B /* DocumentPicker.swift */; };
 		6796A2F9255AB242001E5B96 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 6796A2F8255AB242001E5B96 /* SDWebImageSwiftUI */; };
 		6796A2FC255AB263001E5B96 /* ImgPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6796A2FB255AB263001E5B96 /* ImgPicker.swift */; };
@@ -42,6 +46,9 @@
 
 /* Begin PBXFileReference section */
 		007B04CA53E01B792332BF4A /* Pods-Wise.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Wise.release.xcconfig"; path = "Target Support Files/Pods-Wise/Pods-Wise.release.xcconfig"; sourceTree = "<group>"; };
+		673F33532561319700141FF4 /* Student.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Student.swift; sourceTree = "<group>"; };
+		673F33882561491600141FF4 /* CardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViews.swift; sourceTree = "<group>"; };
+		673F33902561724300141FF4 /* SideMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenu.swift; sourceTree = "<group>"; };
 		673FB99825592A7200C00155 /* Wise.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Wise.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		673FB99B25592A7200C00155 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		673FB99D25592A7200C00155 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,6 +60,7 @@
 		6751325B255A5C840067FCDA /* SelcView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelcView.swift; sourceTree = "<group>"; };
 		67615BD0255CD29900AEBA1F /* student.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = student.json; sourceTree = "<group>"; };
 		67615BD1255CD29900AEBA1F /* teacher.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = teacher.json; sourceTree = "<group>"; };
+		676B6E362560F18B0026E378 /* TeacherView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeacherView.swift; sourceTree = "<group>"; };
 		678EFF2125600AA000A4902B /* DocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPicker.swift; sourceTree = "<group>"; };
 		6796A2FB255AB263001E5B96 /* ImgPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImgPicker.swift; sourceTree = "<group>"; };
 		6796A2FE255AB28B001E5B96 /* Indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Indicator.swift; sourceTree = "<group>"; };
@@ -146,6 +154,10 @@
 			children = (
 				673FB99F25592A7200C00155 /* ContentView.swift */,
 				679C3E2A255E6B68001B026F /* Home.swift */,
+				673F33902561724300141FF4 /* SideMenu.swift */,
+				673F33532561319700141FF4 /* Student.swift */,
+				676B6E362560F18B0026E378 /* TeacherView.swift */,
+				673F33882561491600141FF4 /* CardViews.swift */,
 				67C9FE292559492800697AE0 /* Auth */,
 			);
 			path = Views;
@@ -347,8 +359,12 @@
 				67C9FE23255933AE00697AE0 /* Lottie.swift in Sources */,
 				6796A2FF255AB28B001E5B96 /* Indicator.swift in Sources */,
 				679C3E63255ED99A001B026F /* ActivityIndicator.swift in Sources */,
+				673F33912561724400141FF4 /* SideMenu.swift in Sources */,
+				673F33542561319700141FF4 /* Student.swift in Sources */,
 				679E9FD0255C0DFA000D0601 /* Countries.swift in Sources */,
+				673F33892561491600141FF4 /* CardViews.swift in Sources */,
 				67C9FE422559529500697AE0 /* Modifiers.swift in Sources */,
+				676B6E372560F18B0026E378 /* TeacherView.swift in Sources */,
 				673FB99C25592A7200C00155 /* AppDelegate.swift in Sources */,
 				679C3E45255E9240001B026F /* RoomViewModal.swift in Sources */,
 				673FB99E25592A7200C00155 /* SceneDelegate.swift in Sources */,

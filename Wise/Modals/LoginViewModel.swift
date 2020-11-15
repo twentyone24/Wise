@@ -26,7 +26,7 @@ class LoginViewModel: ObservableObject {
     @Published var loading = false
     
     @AppStorage("isTeacher") var isTeacher = false
-    @Published var user: User = User(id: "", dp: "", isTeacher: false, name: "", phone: "", rooms: [String]())
+    @Published var user: User = User(id: "", dp: "", isTeacher: false, name: "", phone: "")
     
     //MARK:- LOGIN
     func getCountryCode() ->String {
@@ -35,6 +35,11 @@ class LoginViewModel: ObservableObject {
         return countries[regionCode] ?? ""
     }
     
+    init() {
+        if status {
+            self.getUser()
+        }
+    }
     
     func sendCode(){
         
@@ -140,7 +145,7 @@ class LoginViewModel: ObservableObject {
                     completion(false)
                 }
                 
-                self.db.collection("users").document(String(self.phNo)).setData(["name":name, "isTeacher":isTeacher, "dp":"\(url!)", "rooms": [String](), "phone": self.phNo]) { (err) in
+                self.db.collection("users").document(String(self.phNo)).setData(["name":name, "isTeacher":isTeacher, "dp":"\(url!)", "phone": self.phNo]) { (err) in
                     
                     if err != nil {
                         print((err?.localizedDescription)!)
@@ -152,8 +157,6 @@ class LoginViewModel: ObservableObject {
             }
         }
     }
-    
-    
     
     deinit {
         if listenerRegistration != nil {
@@ -168,7 +171,7 @@ class LoginViewModel: ObservableObject {
     
     private var listenerRegistration: ListenerRegistration?
     
-    @Published var roomDetail: Rooms = Rooms(id: "", createdAt: Date(), createdBy: "", roomId: "", roomName: "", subject: "")
+    @Published var roomDetail: Rooms = Rooms(id: "", createdAt: Date(), createdBy: "", roomId: "", roomName: "", subject: "", students: [String]())
     
     
     
@@ -182,6 +185,20 @@ class LoginViewModel: ObservableObject {
                 return try? queryDocumentSnapshot.data(as: Rooms.self)
             }
         }
+    }
+    
+    func studRoomList() {
+        
+        let docRef = db.collection("Rooms").whereField("students", arrayContains: self.phNo)
+        
+        docRef.addSnapshotListener { (querySnapshot, err) in
+            guard let docs = querySnapshot?.documents else { return }
+            
+            self.rooms = docs.compactMap { (queryDocumentSnapshot) -> Rooms? in
+                return try? queryDocumentSnapshot.data(as: Rooms.self)
+            }
+        }
+        
     }
     
     @Published var students: [Attendence] = []
@@ -221,6 +238,17 @@ class LoginViewModel: ObservableObject {
                 print("Error updating document: \(err)")
             } else {
                 print("Document successfully updated")
+                
+                self.db.collection("Rooms").document(id)
+                    .updateData([ "students": FieldValue.arrayUnion([stud]) ]) { err in
+                        if let err = err {
+                            print("Error updating document: \(err)")
+                            return
+                        } else {
+                            print("Room id added in users.")
+                        }
+                    }
+
             }
         }
 
@@ -245,8 +273,9 @@ class LoginViewModel: ObservableObject {
             }
     }
     
+    
     //MARK: CREATE ROOMS (T)
-    func createRoom(rname: String, rsubj: String, code: String){
+    func createRoom(rname: String, rsubj: String, code: String) {
         
         let docData: [String: Any] = [
             "createdBy" : self.phNo,
@@ -254,6 +283,7 @@ class LoginViewModel: ObservableObject {
             "roomId" : code,
             "roomName" : rname,
             "subject" : rsubj,
+            "students" : []
         ]
         
         db.collection("Rooms").document(code).setData(docData) { err in
@@ -279,7 +309,7 @@ class LoginViewModel: ObservableObject {
         
         let param: Attendence = Attendence(isAccepted: false, name: name, phone: self.phNo)
         
-        let _ = try!  db.collection("Rooms/\(id)/Attendence").addDocument(from: param) { (err) in
+        let _ = try!  db.collection("Rooms/\(id)/Attendence").document(self.phNo).setData(from: param) { (err) in
             
             if err != nil{
                 print(err!.localizedDescription)
@@ -287,18 +317,6 @@ class LoginViewModel: ObservableObject {
                 return
             }
             
-            self.db.collection("users")
-                .document(self.phNo).updateData([ "rooms": FieldValue.arrayUnion([id]) ]) { err in
-                if let err = err {
-                    print("Error updating document: \(err)")
-                    completion(false)
-                    return
-                } else {
-                    print("Document successfully updated")
-                    completion(true)
-                }
-            }
-
             completion(true)
             
         }

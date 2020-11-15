@@ -20,6 +20,7 @@ struct Rooms: Identifiable, Codable, Hashable {
     var roomId: String?
     var roomName: String?
     var subject: String?
+    var students: [String]?
     
     enum Keys: String, CodingKey {
         case createdBy = "createdBy"
@@ -27,6 +28,7 @@ struct Rooms: Identifiable, Codable, Hashable {
         case roomId = "roomId"
         case roomName = "roomName"
         case subject = "subject"
+        case students = "students"
     }
     
 }
@@ -94,14 +96,12 @@ struct User: Identifiable, Codable, Hashable {
     var isTeacher: Bool
     var name: String?
     var phone: String?
-    var rooms: [String]?
     
     enum Keys: String, CodingKey {
         case dp = "dp"
         case isTeacher = "isTeacher"
         case name = "name"
         case phone = "phone"
-        case rooms = "rooms"
     }
 }
 
