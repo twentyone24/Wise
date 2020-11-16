@@ -88,6 +88,48 @@ struct Attachments: Identifiable, Codable, Hashable {
     
 }
 
+struct Assessments: Identifiable, Codable, Hashable {
+    
+    @DocumentID var id: String?
+    var addedAt: Date
+    var submTime: Date
+    var desc: String?
+    var addedBy: String?
+    var docUrl: String?
+    var title: String
+    var maxMarks: Int?
+    
+    enum Keys: String, CodingKey {
+        case addedAt = "addedAt"
+        case submTime = "submTime"
+        case addedBy = "addedBy"
+        case docUrl = "docUrl"
+        case sentBy = "sentBy"
+        case title = "title"
+        case maxMarks = "maxMarks"
+    }
+    
+}
+
+struct submission: Identifiable, Codable, Hashable {
+    
+    @DocumentID var id: String?
+    var isGraded: Bool
+    var name: String
+    var submAt: Date?
+    var docUrl: String?
+    var marks: Int?
+    
+    enum Keys: String, CodingKey {
+        case isGraded = "isGraded"
+        case name = "name"
+        case submAt = "submAt"
+        case docUrl = "docUrl"
+        case marks = "marks"
+    }
+    
+}
+
 
 struct User: Identifiable, Codable, Hashable {
     

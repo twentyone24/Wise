@@ -18,6 +18,7 @@ struct SideMenu: View {
     var body: some View {
         VStack {
             
+            Spacer(minLength: 5)
             HStack {
                 if let dp = loginData.user.dp {
                 WebImage(url: Foundation.URL(string: dp)!)
@@ -28,7 +29,7 @@ struct SideMenu: View {
                         Circle().stroke(Color.white, lineWidth: 4))
                     .shadow(radius: 10)
                     .foregroundColor(Color("BG"))
-                    .frame(width: UIScreen.main.bounds.width / 3)
+                    .frame(width: UIScreen.main.bounds.width / 4)
                 }
                 
                 VStack {
@@ -40,10 +41,10 @@ struct SideMenu: View {
                 }
                 
                 
-            }.padding()
+            }.padding(.trailing)
             
             VStack {
-                Spacer()
+                HStack {
                 Button(action: {
                     try? Auth.auth().signOut()
                     withAnimation{ status = false }
@@ -51,11 +52,13 @@ struct SideMenu: View {
                     Text("LogOut")
                         .fontWeight(.heavy)
                 })
-                Spacer()
+                    
+                }.padding(.trailing)
             }
             
             Spacer()
             
-        }
+        }//.frame(width: UIScreen.main.bounds.width / 0.5, alignment: .leading)
+        .background(Color.white)
     }
 }

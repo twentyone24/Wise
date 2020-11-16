@@ -147,59 +147,88 @@ struct ClassroomView: View {
     @ObservedObject var loginData: LoginViewModel
     @State var createRoom = false
     
+    @State var width = UIScreen.main.bounds.width - 90
+    @State var x = -UIScreen.main.bounds.width + 90
+    
     var body: some View {
-        NavigationView {
-            ZStack(alignment: .bottomTrailing) {
-                ScrollView(.vertical, showsIndicators: false) {
-                    ForEach(self.loginData.rooms) { i in
-                        NavigationLink(destination: teacherRoomDetail(loginData: loginData, id: i.roomId!)) {
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text(i.roomName ?? "N/A").bold().padding(3).foregroundColor(Color("text"))
-                                Divider()
-                                Text(i.subject ?? "N/A").padding(.horizontal, 5).foregroundColor(Color("text"))
-                                Text("\(i.createdAt!.getFormattedDate(format: "MMM d, h:mm a") )").padding(.horizontal, 5).foregroundColor(Color("text"))
-                                
+        ZStack(alignment: Alignment(horizontal: .leading, vertical: .center)) {
+            NavigationView {
+                ZStack(alignment: .bottomTrailing) {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        ForEach(self.loginData.rooms) { i in
+                            NavigationLink(destination: teacherRoomDetail(loginData: loginData, id: i.roomId!)) {
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text(i.roomName ?? "N/A").bold().padding(3).foregroundColor(Color("text"))
+                                    Divider()
+                                    Text(i.subject ?? "N/A").padding(.horizontal, 5).foregroundColor(Color("text"))
+                                    Text("\(i.createdAt!.getFormattedDate(format: "MMM d, h:mm a") )").padding(.horizontal, 5).foregroundColor(Color("text"))
+                                    
+                                }
+                                .frame(height: UIScreen.main.bounds.height / 7, alignment: .center)
+                                .background(BlurBG())
+                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                                .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: -5)
+                                .cornerRadius(20)
+                                .padding(.horizontal, 10)
                             }
-                            .frame(height: UIScreen.main.bounds.height / 7, alignment: .center)
-                            .background(BlurBG())
-                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
-                            .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: -5)
-                            .cornerRadius(20)
-                            .padding(.horizontal, 10)
                         }
                     }
-                }
-                .padding(.top, 10)
-                .navigationBarTitle("Your Active Classrooms", displayMode: .inline)
-                .navigationBarItems(
-                    leading:
-                        Button(action: {
-                            withAnimation{
-                                
+                    .padding(.top, 10)
+                    .navigationBarTitle("Your Active Classrooms", displayMode: .inline)
+                    .navigationBarItems(
+                        leading:
+                            Button(action: {
+                                withAnimation{
+                                    x = 0
+                                }
+                            }) {
+                                Image(systemName: "gear")
+                                    .font(.system(size: 24))
+                                    .foregroundColor(Color("theme"))
                             }
-                        }) {
-                            Image(systemName: "line.horizontal.3")
-                                .font(.system(size: 24))
-                                .foregroundColor(.black)
-                        }
-                )
-                
-                Button(action: {
-                    self.createRoom.toggle()
-                }) {
-                    Image(systemName: "plus.circle.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(Color("theme"))
-                        .padding()
-                        .offset(y: -20)
-                }
-                .fullScreenCover(isPresented: self.$createRoom) {
-                    Wise.createRoom(show: self.$createRoom, loginData: loginData)
+                    )
+                    
+                    Button(action: {
+                        self.createRoom.toggle()
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(Color("theme"))
+                            .padding()
+                            .offset(y: -20)
+                    }
+                    .fullScreenCover(isPresented: self.$createRoom) {
+                        Wise.createRoom(show: self.$createRoom, loginData: loginData)
+                    }
                 }
             }
+            .overlay(Color.black.opacity(x == 0 ? 0.5 : 0).ignoresSafeArea(.all, edges: .vertical)
+                        .onTapGesture { withAnimation { x = -width } })
+            
+            SideMenu(loginData: loginData)
+                .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
+                .offset(x: x)
+                .edgesIgnoringSafeArea(.top)
+            
+            
         }
+        //        .gesture(DragGesture().onChanged({ (value) in
+        //            withAnimation {
+        //                if value.translation.width > 0 {
+        //                    if x < 0 { x = -width + value.translation.width }
+        //                } else {
+        //                    if x != -width { x = value.translation.width }
+        //                }
+        //            }
+        //        }).onEnded({ (value) in
+        //            withAnimation {
+        //                if -x < width / 2 { x = 0 }
+        //                else { x = -width }
+        //            }
+        //        }))
+        
     }
 }
 

@@ -227,6 +227,28 @@ class LoginViewModel: ObservableObject {
         
     }
     
+    func deleteStud(id: String, stud: String) {
+        let docRef = db.collection("Rooms/\(id)/Attendence").document(stud)
+        
+        docRef.delete() { err in
+            if let err = err {
+                print("Error removing document: \(err)")
+            } else {
+                print("Document successfully removed!")
+                self.db.collection("Rooms").document(id)
+                    .updateData([ "students": FieldValue.arrayRemove([stud]) ]) { err in
+                        if let err = err {
+                            print("Error updating document: \(err)")
+                            return
+                        } else {
+                            print("Room id added in users.")
+                        }
+                    }
+            }
+        }
+        
+    }
+    
     func AcceptRequest(id: String, stud: String) {
         let docRef = db.collection("Rooms/\(id)/Attendence").document(stud)
         
@@ -248,10 +270,10 @@ class LoginViewModel: ObservableObject {
                             print("Room id added in users.")
                         }
                     }
-
+                
             }
         }
-
+        
     }
     
     func fetchData(id: String) {
@@ -293,13 +315,13 @@ class LoginViewModel: ObservableObject {
             } else {
                 self.db.collection("users")
                     .document(self.phNo).updateData([ "rooms": FieldValue.arrayUnion([code]) ]) { err in
-                    if let err = err {
-                        print("Error updating document: \(err)")
-                        return
-                    } else {
-                        print("Document successfully updated")
+                        if let err = err {
+                            print("Error updating document: \(err)")
+                            return
+                        } else {
+                            print("Document successfully updated")
+                        }
                     }
-                }
             }
         }
     }
@@ -308,16 +330,24 @@ class LoginViewModel: ObservableObject {
     func joinRoom(id: String, name: String, completion : @escaping (Bool)-> Void) {
         
         let param: Attendence = Attendence(isAccepted: false, name: name, phone: self.phNo)
-        
-        let _ = try!  db.collection("Rooms/\(id)/Attendence").document(self.phNo).setData(from: param) { (err) in
-            
-            if err != nil{
-                print(err!.localizedDescription)
+        let dbRef = db.collection("Rooms").document(id)
+        dbRef.getDocument { (document, error) in
+            if document!.exists {
+                let _ = try!  self.db.collection("Rooms/\(id)/Attendence").document(self.phNo).setData(from: param) { (err) in
+                    
+                    if err != nil{
+                        print(err!.localizedDescription)
+                        completion(false)
+                        return
+                    }
+                    completion(true)
+                }
+            } else {
+                print("Enter a valid Room")
                 completion(false)
                 return
             }
             
-            completion(true)
             
         }
     }
@@ -337,7 +367,7 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-
+    
     
     func writeMsg(id: String, txt: String, sentBy: String){
         print(self.user)
@@ -349,7 +379,7 @@ class LoginViewModel: ObservableObject {
                 print(err!.localizedDescription)
                 return
             }
- 
+            
         }
         
         self.txt = ""
@@ -384,7 +414,7 @@ class LoginViewModel: ObservableObject {
                 return
             }
             
-            let param: Attachments = Attachments(sentAt: Date(), desc: desc, docUrl: data.absoluteString, sentBy: sentBy, title: title)
+            let param: Attachments = Attachments(sentAt: Date(), desc: desc, docUrl: "\(url!)", sentBy: sentBy, title: title)
             let _ = try! self.db.collection("Rooms/\(id)/Attachments").addDocument(from: param) { (err) in
                 
                 if err != nil{
@@ -392,14 +422,27 @@ class LoginViewModel: ObservableObject {
                     return
                 }
                 completion(true)
-     
+                
             }
             
             
-        
+            
         }
     }
     
+    @Published var resources: [Attachments] = []
+    //MARK: DOWNLOAD RESOURCES (S)
+    func getResources(id: String) {
+        self.resources = []
+        db.collection("Rooms/\(id)/Attachments").order(by: "sentAt", descending: true).addSnapshotListener { (querySnapshot, err) in
+            guard let docs = querySnapshot?.documents else { return }
+            
+            self.resources = docs.compactMap { (queryDocumentSnapshot) -> Attachments? in
+                return try? queryDocumentSnapshot.data(as: Attachments.self)
+                
+            }
+        }
+    }
     
     
 }

@@ -32,6 +32,8 @@
 		679E9FCC255C0DFA000D0601 /* Verification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679E9FC5255C0DF8000D0601 /* Verification.swift */; };
 		679E9FCF255C0DFA000D0601 /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679E9FC8255C0DF9000D0601 /* Login.swift */; };
 		679E9FD0255C0DFA000D0601 /* Countries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679E9FC9255C0DFA000D0601 /* Countries.swift */; };
+		67A8F22425624153005EC20C /* PDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67A8F22325624153005EC20C /* PDFView.swift */; };
+		67A8F22C256256D0005EC20C /* PDFViewer in Frameworks */ = {isa = PBXBuildFile; productRef = 67A8F22B256256D0005EC20C /* PDFViewer */; };
 		67C9FE1725592CE700697AE0 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 67C9FE1625592CE700697AE0 /* GoogleService-Info.plist */; };
 		67C9FE1B25592DE400697AE0 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 67C9FE1A25592DE400697AE0 /* Lottie */; };
 		67C9FE1F2559339300697AE0 /* login.json in Resources */ = {isa = PBXBuildFile; fileRef = 67C9FE1E2559339300697AE0 /* login.json */; };
@@ -72,6 +74,7 @@
 		679E9FC5255C0DF8000D0601 /* Verification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Verification.swift; sourceTree = "<group>"; };
 		679E9FC8255C0DF9000D0601 /* Login.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Login.swift; sourceTree = "<group>"; };
 		679E9FC9255C0DFA000D0601 /* Countries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Countries.swift; sourceTree = "<group>"; };
+		67A8F22325624153005EC20C /* PDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFView.swift; sourceTree = "<group>"; };
 		67C9FE1625592CE700697AE0 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		67C9FE1E2559339300697AE0 /* login.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = login.json; sourceTree = "<group>"; };
 		67C9FE22255933AE00697AE0 /* Lottie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Lottie.swift; sourceTree = "<group>"; };
@@ -90,6 +93,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6796A2F9255AB242001E5B96 /* SDWebImageSwiftUI in Frameworks */,
+				67A8F22C256256D0005EC20C /* PDFViewer in Frameworks */,
 				CB6975C2AAD5CE467CAF8308 /* Pods_Wise.framework in Frameworks */,
 				67C9FE1B25592DE400697AE0 /* Lottie in Frameworks */,
 			);
@@ -206,6 +210,7 @@
 				6796A2FB255AB263001E5B96 /* ImgPicker.swift */,
 				6796A2FE255AB28B001E5B96 /* Indicator.swift */,
 				678EFF2125600AA000A4902B /* DocumentPicker.swift */,
+				67A8F22325624153005EC20C /* PDFView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -250,6 +255,7 @@
 			packageProductDependencies = (
 				67C9FE1A25592DE400697AE0 /* Lottie */,
 				6796A2F8255AB242001E5B96 /* SDWebImageSwiftUI */,
+				67A8F22B256256D0005EC20C /* PDFViewer */,
 			);
 			productName = Wise;
 			productReference = 673FB99825592A7200C00155 /* Wise.app */;
@@ -281,6 +287,7 @@
 			packageReferences = (
 				67C9FE1925592DE400697AE0 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				6796A2F7255AB242001E5B96 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				67A8F22A256256D0005EC20C /* XCRemoteSwiftPackageReference "PDFViewer" */,
 			);
 			productRefGroup = 673FB99925592A7200C00155 /* Products */;
 			projectDirPath = "";
@@ -369,6 +376,7 @@
 				679C3E45255E9240001B026F /* RoomViewModal.swift in Sources */,
 				673FB99E25592A7200C00155 /* SceneDelegate.swift in Sources */,
 				678EFF2225600AA000A4902B /* DocumentPicker.swift in Sources */,
+				67A8F22425624153005EC20C /* PDFView.swift in Sources */,
 				679C3E2B255E6B68001B026F /* Home.swift in Sources */,
 				679E9FCA255C0DFA000D0601 /* CustomNumberPad.swift in Sources */,
 				679E9FCF255C0DFA000D0601 /* Login.swift in Sources */,
@@ -448,7 +456,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -503,7 +511,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -591,6 +599,14 @@
 				minimumVersion = 1.5.0;
 			};
 		};
+		67A8F22A256256D0005EC20C /* XCRemoteSwiftPackageReference "PDFViewer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rajubd49/PDFViewer.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
 		67C9FE1925592DE400697AE0 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
@@ -606,6 +622,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6796A2F7255AB242001E5B96 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
 			productName = SDWebImageSwiftUI;
+		};
+		67A8F22B256256D0005EC20C /* PDFViewer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 67A8F22A256256D0005EC20C /* XCRemoteSwiftPackageReference "PDFViewer" */;
+			productName = PDFViewer;
 		};
 		67C9FE1A25592DE400697AE0 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

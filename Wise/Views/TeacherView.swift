@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
- 
+
 
 struct TeacherView: View {
     
@@ -96,7 +96,7 @@ struct createRoom: View {
                 .padding(15)
             
             Button(action: {
-                loginData.createRoom(rname: self.roomName, rsubj: self.desc, code: "ofbb1")
+                loginData.createRoom(rname: self.roomName, rsubj: self.desc, code: "ofcb1")
                 self.show.toggle()
             }, label: {
                 Text("Create Room")
@@ -107,6 +107,77 @@ struct createRoom: View {
                     .cornerRadius(15)
             })
             .disabled(self.desc == "" && self.roomName == "" ? true: false)
+            
+            Spacer()
+            
+        }
+    }
+    
+}
+
+struct uploadDocument: View {
+    
+    @Binding var show: Bool
+    @ObservedObject var loginData: LoginViewModel
+    @State var title: String = ""
+    @State var desc: String = ""
+    @State var openFile = false
+    @State var id: String
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Button(action: {
+                    self.show.toggle()
+                }) {
+                    Image(systemName: "arrow.left")
+                        .font(.title2)
+                        .foregroundColor(.black)
+                }
+                Spacer()
+            }.padding()
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Title").padding(.horizontal)
+                TextField("title", text: self.$title)
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+                
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Description").padding(.horizontal)
+                TextField("Description", text: self.$desc)
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+            }
+            
+            Button { openFile.toggle() } label: {
+                Text("Add Attachments")
+                    .bold()
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+            }
+            .background(Color("theme"))
+            .cornerRadius(15)
+            .padding(15)
+            .fileImporter(isPresented: $openFile, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
+                do {
+                    let fileUrl = try res.get()
+                    loginData.uploadResource(data: fileUrl, id: id, desc: desc, title: title, sentBy: loginData.user.name ?? " ") { (stat) in
+                        if stat {
+                            self.show.toggle()
+                        }
+                    }
+                } catch {
+                    print(error.localizedDescription)
+                }
+            }
             
             Spacer()
             
@@ -221,27 +292,25 @@ struct teacherRoomDetail: View {
                     .onEnded({ (value) in
                         
                         if value.translation.width > 50 {
-                            print("right")
                             if ind > 0 && ind <= 4 {
-                                withAnimation() { ind -= 1 }
+                                ind -= 1
                             }
                             
                         }
                         if -value.translation.width > 50 {
-                            print("left")
                             if ind >= 0 && ind < 4 {
-                                withAnimation() { ind += 1 }
+                                ind += 1
                             }
                         }
                     }))
-            
         }
         
         .navigationBarTitle("Classroom", displayMode: .inline)
         .onAppear() {
             self.loginData.fetchData(id: id)
             self.loginData.messages(id: id)
-            loginData.studentRequests(id: id)
+            self.loginData.studentRequests(id: id)
+            self.loginData.getResources(id: id)
         }
     }
     
@@ -330,19 +399,39 @@ struct teacherRoomDetail: View {
         let av = UIActivityViewController(activityItems: [text], applicationActivities: nil)
         
         UIApplication.shared.windows.first?.rootViewController?.present(av, animated: true, completion: nil)
-
+        
     }
     
     
-    @State var fileName = ""
     @State var openFile = false
-    @State var desc: String = ""
-    @State var title = ""
     
     var Resourses: some View {
         VStack {
+            if loginData.resources.count != 0 {
+                ScrollView(.vertical, showsIndicators: false) {
+                    ForEach(loginData.resources, id: \.self) { i in
+                        NavigationLink(destination: ResourceDetail(doc: i)) {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(i.title!).bold()
+                                    
+                                }
+                                Spacer()
+                                
+                                VStack(alignment: .leading) {
+                                    Text("Added At:").foregroundColor(.gray)
+                                    Text("\(i.sentAt!.getFormattedDate(format: "MMM d, h:mm a"))").bold()
+                                }
+                            }.padding()
+                            .background(BlurBG())
+                            .cornerRadius(15)
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+                
+            }
             Spacer()
-            Text(fileName)
             
             Button { openFile.toggle() } label: {
                 Text("Add Resources")
@@ -354,22 +443,11 @@ struct teacherRoomDetail: View {
             .background(Color("theme"))
             .cornerRadius(15)
             .padding(15)
-            .fileImporter(isPresented: $openFile, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
-                do {
-                    let fileUrl = try res.get()
-                    self.fileName = fileUrl.lastPathComponent
-                    loginData.uploadResource(data: fileUrl, id: id, desc: "test", title: "test", sentBy: loginData.user.name ?? " ") { (stat) in
-                        if stat {
-                            print("DONE")
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            }
-            
         }
         .contentShape(Rectangle())
+        .fullScreenCover(isPresented: self.$openFile) {
+            Wise.uploadDocument(show: self.$openFile, loginData: loginData, id: id)
+        }
     }
     
     
@@ -446,7 +524,7 @@ struct teacherRoomDetail: View {
                             Spacer()
                             
                             Button(action: {
-                                loginData.deleteRequest(id: id, stud: i.phone)
+                                loginData.deleteStud(id: id, stud: i.phone)
                             }) {
                                 Image(systemName: "xmark.circle.fill").font(.title).foregroundColor(.red)
                             }
@@ -523,6 +601,85 @@ struct teacherRoomDetail: View {
         }
         .contentShape(Rectangle())
         .ignoresSafeArea(.all, edges: .top)
+    }
+    
+}
+
+
+struct ResourceDetail: View {
+    
+    @State var doc: Attachments
+    @State var openFile = false
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Title").padding(.horizontal)
+                Text(doc.title!)
+                    .bold()
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+                
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Description").padding(.horizontal)
+                Text(doc.desc!)
+                    .bold()
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+                
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Uploaded At").padding(.horizontal)
+                Text("\(doc.sentAt!.getFormattedDate(format: "MMM d, h:mm a"))")
+                    .bold()
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+                
+            }
+            
+            Spacer()
+            
+            Button(action: {
+                self.openFile.toggle()
+            }, label: {
+                Text("Open Document")
+                    .foregroundColor(.black)
+                    .frame(width: UIScreen.main.bounds.width - 30,height: 50)
+                    .buttonStyle(ScaleButtonStyle())
+                    .background(Color("yellow"))
+                    .cornerRadius(15)
+            })
+            .fullScreenCover(isPresented: self.$openFile) {
+                VStack {
+                HStack {
+                    Button(action: {
+                        self.openFile.toggle()
+                    }) {
+                        Image(systemName: "arrow.left")
+                            .font(.title2)
+                            .foregroundColor(.black)
+                    }
+                    Spacer()
+                }.padding()
+                //PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+                    PDFKitView(url: Foundation.URL(string: doc.docUrl!))
+                }
+            }
+            
+            Spacer()
+            
+        }.padding()
+        .onAppear() { print(doc.docUrl)}
     }
     
 }
