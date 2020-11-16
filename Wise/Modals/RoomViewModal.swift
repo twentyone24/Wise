@@ -111,7 +111,7 @@ struct Assessments: Identifiable, Codable, Hashable {
     
 }
 
-struct submission: Identifiable, Codable, Hashable {
+struct Submission: Identifiable, Codable, Hashable {
     
     @DocumentID var id: String?
     var isGraded: Bool

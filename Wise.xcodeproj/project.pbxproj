@@ -19,6 +19,7 @@
 		6751325C255A5C840067FCDA /* SelcView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6751325B255A5C840067FCDA /* SelcView.swift */; };
 		67615BD2255CD29900AEBA1F /* student.json in Resources */ = {isa = PBXBuildFile; fileRef = 67615BD0255CD29900AEBA1F /* student.json */; };
 		67615BD3255CD29A00AEBA1F /* teacher.json in Resources */ = {isa = PBXBuildFile; fileRef = 67615BD1255CD29900AEBA1F /* teacher.json */; };
+		6763A3A22562E568006619A9 /* BottomSheet in Frameworks */ = {isa = PBXBuildFile; productRef = 6763A3A12562E568006619A9 /* BottomSheet */; };
 		676B6E372560F18B0026E378 /* TeacherView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 676B6E362560F18B0026E378 /* TeacherView.swift */; };
 		678EFF2225600AA000A4902B /* DocumentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678EFF2125600AA000A4902B /* DocumentPicker.swift */; };
 		6796A2F9255AB242001E5B96 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 6796A2F8255AB242001E5B96 /* SDWebImageSwiftUI */; };
@@ -92,6 +93,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6763A3A22562E568006619A9 /* BottomSheet in Frameworks */,
 				6796A2F9255AB242001E5B96 /* SDWebImageSwiftUI in Frameworks */,
 				67A8F22C256256D0005EC20C /* PDFViewer in Frameworks */,
 				CB6975C2AAD5CE467CAF8308 /* Pods_Wise.framework in Frameworks */,
@@ -256,6 +258,7 @@
 				67C9FE1A25592DE400697AE0 /* Lottie */,
 				6796A2F8255AB242001E5B96 /* SDWebImageSwiftUI */,
 				67A8F22B256256D0005EC20C /* PDFViewer */,
+				6763A3A12562E568006619A9 /* BottomSheet */,
 			);
 			productName = Wise;
 			productReference = 673FB99825592A7200C00155 /* Wise.app */;
@@ -288,6 +291,7 @@
 				67C9FE1925592DE400697AE0 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				6796A2F7255AB242001E5B96 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				67A8F22A256256D0005EC20C /* XCRemoteSwiftPackageReference "PDFViewer" */,
+				6763A3A02562E568006619A9 /* XCRemoteSwiftPackageReference "bottom-sheet" */,
 			);
 			productRefGroup = 673FB99925592A7200C00155 /* Products */;
 			projectDirPath = "";
@@ -591,6 +595,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		6763A3A02562E568006619A9 /* XCRemoteSwiftPackageReference "bottom-sheet" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weitieda/bottom-sheet.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.5;
+			};
+		};
 		6796A2F7255AB242001E5B96 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
@@ -618,6 +630,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6763A3A12562E568006619A9 /* BottomSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6763A3A02562E568006619A9 /* XCRemoteSwiftPackageReference "bottom-sheet" */;
+			productName = BottomSheet;
+		};
 		6796A2F8255AB242001E5B96 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6796A2F7255AB242001E5B96 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;

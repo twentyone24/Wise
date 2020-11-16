@@ -43,10 +43,21 @@ struct PDFProvider: View, DownloadManagerDelegate {
         ZStack (alignment: .top) {
             
             ZStack {
-                
-                PDFViewer(pdfUrlString: self.pdfUrlString)
+                if viewRemotePDF {
+                    PDFViewer(pdfUrlString: self.pdfUrlString) }
                 ProgressView(value: self.$progressValue, visible: self.$loadingPDF)
             }
+            
+            HStack {
+                Button(action: {
+                    self.openFile.toggle()
+                }) {
+                    Image(systemName: "arrow.left")
+                        .font(.title2)
+                        .foregroundColor(.black)
+                }
+                Spacer()
+            }.padding()
             
         }
         
@@ -62,11 +73,7 @@ struct PDFProvider: View, DownloadManagerDelegate {
     
     private func fileExistsInDirectory() -> Bool {
         if let cachesDirectoryUrl =  FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first, let lastPathComponent = URL(string: self.pdfUrlString)?.lastPathComponent {
-            print("___________________________________________________")
-            print(cachesDirectoryUrl)
             let url = cachesDirectoryUrl.appendingPathComponent(lastPathComponent)
-            print(pdfUrlString)
-            print(url)
             if FileManager.default.fileExists(atPath: url.path) {
                 return true
             }

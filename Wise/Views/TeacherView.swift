@@ -660,26 +660,25 @@ struct ResourceDetail: View {
                     .cornerRadius(15)
             })
             .fullScreenCover(isPresented: self.$openFile) {
-                VStack {
-                HStack {
-                    Button(action: {
-                        self.openFile.toggle()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.title2)
-                            .foregroundColor(.black)
-                    }
-                    Spacer()
-                }.padding()
-                //PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
-                    PDFKitView(url: Foundation.URL(string: doc.docUrl!))
-                }
+//                VStack {
+//                HStack {
+//                    Button(action: {
+//                        self.openFile.toggle()
+//                    }) {
+//                        Image(systemName: "arrow.left")
+//                            .font(.title2)
+//                            .foregroundColor(.black)
+//                    }
+//                    Spacer()
+//                }.padding()
+                PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+                    //PDFKitView(url: Foundation.URL(string: doc.docUrl!))
+                //}
             }
             
             Spacer()
             
         }.padding()
-        .onAppear() { print(doc.docUrl)}
     }
     
 }

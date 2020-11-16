@@ -133,14 +133,14 @@ class LoginViewModel: ObservableObject {
         loading = true
         storage.child("profilepics").child(uid!).putData(imagedata, metadata: nil) { (_, err) in
             
-            if err != nil{
+            if err != nil {
                 print((err?.localizedDescription)!)
                 completion(false)
             }
             
             storage.child("profilepics").child(uid!).downloadURL { (url, err) in
                 
-                if err != nil{
+                if err != nil {
                     print((err?.localizedDescription)!)
                     completion(false)
                 }
@@ -369,7 +369,7 @@ class LoginViewModel: ObservableObject {
     
     
     
-    func writeMsg(id: String, txt: String, sentBy: String){
+    func writeMsg(id: String, txt: String, sentBy: String) {
         print(self.user)
         let msg = Msg(isTeacher: self.isTeacher, sentBy: sentBy , sentAt: Date(), text: txt )
         
@@ -388,50 +388,39 @@ class LoginViewModel: ObservableObject {
     //MARK: UPLOAD ATTACHMENTS (T)
     func uploadResource(data: URL, id: String, desc: String, title: String, sentBy: String, completion : @escaping (Bool)-> Void) {
         let storage = Storage.storage().reference()
-        let uid = Auth.auth().currentUser?.uid
         
-        storage.child("resources").child(uid!).putFile(from: data, metadata: nil) { (_, err) in
+        storage.child("resources").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
             if err != nil {
                 print((err?.localizedDescription)!)
                 completion(false)
                 return
             }
             
-            storage.child("resources").child(uid!).downloadURL { (url, err) in
+            storage.child("resources").child("\(data.lastPathComponent)").downloadURL { (url, err) in
                 if err != nil {
                     print((err?.localizedDescription)!)
                     completion(false)
                     return
                 }
+                
+                let param: Attachments = Attachments(sentAt: Date(), desc: desc, docUrl: "\(url!)", sentBy: sentBy, title: title)
+                let _ = try! self.db.collection("Rooms/\(id)/Attachments").addDocument(from: param) { (err) in
+                    
+                    if err != nil{
+                        print(err!.localizedDescription)
+                        return
+                    }
+                    completion(true)
+                    
+                }
+
             }
         }
         
-        storage.child("resources").child(uid!).downloadURL { (url, err) in
-            
-            if err != nil {
-                print((err?.localizedDescription)!)
-                completion(false)
-                return
-            }
-            
-            let param: Attachments = Attachments(sentAt: Date(), desc: desc, docUrl: "\(url!)", sentBy: sentBy, title: title)
-            let _ = try! self.db.collection("Rooms/\(id)/Attachments").addDocument(from: param) { (err) in
-                
-                if err != nil{
-                    print(err!.localizedDescription)
-                    return
-                }
-                completion(true)
-                
-            }
-            
-            
-            
-        }
     }
     
     @Published var resources: [Attachments] = []
-    //MARK: DOWNLOAD RESOURCES (S)
+    //MARK: GET RESOURCES (S)
     func getResources(id: String) {
         self.resources = []
         db.collection("Rooms/\(id)/Attachments").order(by: "sentAt", descending: true).addSnapshotListener { (querySnapshot, err) in
@@ -444,7 +433,97 @@ class LoginViewModel: ObservableObject {
         }
     }
     
+    //MARK: ASSESSMENTS ()
+    @Published var assessments: [Assessments] = []
+    func getAssessments(id: String) {
+        self.assessments = []
+        let dbRef = db.collection("Rooms/\(id)/Assesments").order(by: "addedAt", descending: true)
+        
+        dbRef.addSnapshotListener { (querySnapshot, err) in
+            guard let docs = querySnapshot?.documents else { return }
+            
+            self.assessments = docs.compactMap { (queryDocumentSnapshot) -> Assessments? in
+                return try? queryDocumentSnapshot.data(as: Assessments.self)
+                
+            }
+        }
+    }
     
+    func submitAssessments(id: String, data: URL, name: String, completion : @escaping (Bool)-> Void) {
+        let storage = Storage.storage().reference()
+        
+        storage.child("assessments").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
+            if err != nil {
+                print((err?.localizedDescription)!)
+                completion(false)
+                return
+            }
+            
+            storage.child("assessments").child("\(data.lastPathComponent)").downloadURL { (url, err) in
+                
+                if err != nil {
+                    print((err?.localizedDescription)!)
+                    completion(false)
+                    return
+                }
+                
+                let dbRef = self.db.collection("Rooms/\(id)/Assesments/submissions")
+                let param: Submission = Submission(isGraded: false, name: name, submAt: Date(), docUrl: "\(url!)")
+                let _ = try! dbRef.document("submissions").setData(from: param) { (err) in
+                    
+                    if err != nil{
+                        print(err!.localizedDescription)
+                        return
+                    }
+                    print("SUBMITTED!")
+                    completion(true)
+                    
+                }
+            }
+        }
+        
+        
+    }
+    
+    
+    func createAssessments(id: String, data: URL, name: String, due: Date, title: String, desc: String, points: Int, completion : @escaping (Bool)-> Void) {
+        let storage = Storage.storage().reference()
+        
+        storage.child("assessments").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
+            if err != nil {
+                print((err?.localizedDescription)!)
+                completion(false)
+                return
+            }
+            
+            storage.child("assessments").child("\(data.lastPathComponent)").downloadURL { (url, err) in
+                
+                if err != nil {
+                    print((err?.localizedDescription)!)
+                    completion(false)
+                    return
+                }
+                
+                let dbRef = self.db.collection("Rooms/\(id)/Assesments")
+                let param: Assessments = Assessments(addedAt: Date(), submTime: due, desc: desc, addedBy: name, docUrl: "\(url!)", title: title, maxMarks: points)
+                let _ = try! dbRef.addDocument(from: param) { (err) in
+                    
+                    if err != nil{
+                        print(err!.localizedDescription)
+                        return
+                    }
+                    print("CREATED!")
+                    completion(true)
+                    
+                }
+                
+                
+                
+            }
+        }
+        
+        
+    }
 }
 
 
