@@ -842,7 +842,11 @@ struct TeacherAssesDetail: View {
     @State var showSubmit = false
     @State var add = false
     
+    @State var studDet: Submission = Submission(isGraded: false, name: "", submAt: Date(), docUrl: "")
+    @State var grade = false
+    @State var marks: Int = 0
     
+    @State var studAttach = false
     
     var body: some View {
         VStack {
@@ -950,7 +954,8 @@ struct TeacherAssesDetail: View {
                     ScrollView(.vertical, showsIndicators: false) {
                         ForEach(loginData.studentAsses, id: \.self) { i in
                             Button(action: {
-                                
+                                self.studDet = i
+                                self.grade.toggle()
                             }) {
                                 HStack {
                                     VStack(alignment: .leading) {
@@ -960,16 +965,17 @@ struct TeacherAssesDetail: View {
                                         Spacer()
                                         
                                         VStack(alignment: .leading) {
-                                            Text("Due:").foregroundColor(.gray)
+                                            Text("OUT OF \(doc.maxMarks!)").foregroundColor(.gray).font(.caption)
                                             Text(
-                                                i.isGraded ? "MARKS" : "GRADE"
+                                                i.isGraded ? "\(i.marks!)" : "GRADE"
                                             ).bold().foregroundColor(i.isGraded ? .gray : .red)
                                         }
                                     }.padding()
                                     .background(BlurBG())
                                     .cornerRadius(15)
                                     .padding(.horizontal)
-                                }
+                            }
+                            
                                     
                                 
                             }
@@ -978,11 +984,80 @@ struct TeacherAssesDetail: View {
                     Spacer()
                     
                     
+                }.bottomSheet(isPresented: self.$grade, height: UIScreen.main.bounds.height /  3) {
+                    if studDet.isGraded {
+                        VStack(alignment: .leading) {
+                            Text("OUT OF \(doc.maxMarks!)").foregroundColor(.gray).font(.caption)
+                            Text("\(studDet.marks!)").bold().foregroundColor(studDet.isGraded ? .green : .red)
+                        }
+                    } else {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                Text("OUT OF \(doc.maxMarks!)").foregroundColor(.gray).font(.caption)
+                            }
+                            Spacer()
+                            
+                            Capsule()
+                                .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow)
+                            Button(action: {
+                                self.studAttach.toggle()
+                            }, label: {
+                                Text("REVIEW ATTACHMENTS")
+                                    .bold()
+                                    .foregroundColor(.black)
+                                    .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                                    .buttonStyle(ScaleButtonStyle())
+                                    .background(Color("yellow"))
+                                    .cornerRadius(15)
+                            })
+                            .fullScreenCover(isPresented: self.$studAttach) {
+                                PDFProvider(openFile: self.$studAttach, pdfUrlString: studDet.docUrl!)
+                            }
+                            Capsule()
+                                .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow)
+                            
+                            Spacer()
+                            
+                            HStack {
+                                VStack(alignment: .center, spacing: 0) {
+                                    Text("Marks").font(.caption)
+                                    
+                                    Picker("Marks", selection: $marks) {
+                                        ForEach(1...doc.maxMarks!, id: \.self) { int in
+                                            Text("\(int)").tag(int)
+                                        }
+                                    }.pickerStyle(WheelPickerStyle())
+                                    .frame(width: 65, height: 45)
+                                        .background(Color("Color"))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    
+                                    
+                                }
+                                
+                                Button(action: {
+                                    loginData.grade(id: id, docID: doc.id!, student: studDet.id!, marks: marks)
+                                    self.grade = false
+                                }, label: {
+                                    Text("GRADE")
+                                        .bold()
+                                        .foregroundColor(.black)
+                                        .padding(.horizontal, 40)
+                                        .frame(height: 55)
+                                        .buttonStyle(ScaleButtonStyle())
+                                        .background(Color("yellow"))
+                                        .cornerRadius(15)
+                                        .padding(.trailing)
+                                })
+                                
+                                
+                            }.padding()
+                        }.padding()
+                    }
                 }
             }
             
-            
-            
-        
+         
     }
 }
+

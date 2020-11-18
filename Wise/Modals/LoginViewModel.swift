@@ -18,6 +18,9 @@ class LoginViewModel: ObservableObject {
     
     @Published var errorMsg = ""
     @Published var error = false
+    @Published var HUDMsg = ""
+    @Published var HUD = false
+    
     
     @Published var CODE = ""
     @Published var gotoVerify = false
@@ -149,7 +152,10 @@ class LoginViewModel: ObservableObject {
                     
                     if err != nil {
                         print((err?.localizedDescription)!)
+                        self.errorMsg = err!.localizedDescription
+                        withAnimation{ self.error.toggle()}
                         completion(false)
+                        return
                     }
                     
                     completion(true)
@@ -220,6 +226,8 @@ class LoginViewModel: ObservableObject {
         docRef.delete() { err in
             if let err = err {
                 print("Error removing document: \(err)")
+                self.errorMsg = err.localizedDescription
+                withAnimation{ self.error.toggle()}
             } else {
                 print("Document successfully removed!")
             }
@@ -233,6 +241,8 @@ class LoginViewModel: ObservableObject {
         docRef.delete() { err in
             if let err = err {
                 print("Error removing document: \(err)")
+                self.errorMsg = err.localizedDescription
+                withAnimation{ self.error.toggle()}
             } else {
                 print("Document successfully removed!")
                 self.db.collection("Rooms").document(id)
@@ -258,6 +268,8 @@ class LoginViewModel: ObservableObject {
         ]) { err in
             if let err = err {
                 print("Error updating document: \(err)")
+                self.errorMsg = err.localizedDescription
+                withAnimation{ self.error.toggle()}
             } else {
                 print("Document successfully updated")
                 
@@ -287,6 +299,7 @@ class LoginViewModel: ObservableObject {
                             self.roomDetail = data!
                             print(self.roomDetail)
                         } catch {
+                             
                             print("Error decoding JSON: \(error)")
                         }
                         
@@ -317,6 +330,8 @@ class LoginViewModel: ObservableObject {
                     .document(self.phNo).updateData([ "rooms": FieldValue.arrayUnion([code]) ]) { err in
                         if let err = err {
                             print("Error updating document: \(err)")
+                            self.errorMsg = err.localizedDescription
+                            withAnimation{ self.error.toggle()}
                             return
                         } else {
                             print("Document successfully updated")
@@ -337,12 +352,15 @@ class LoginViewModel: ObservableObject {
                     
                     if err != nil{
                         print(err!.localizedDescription)
+                        self.errorMsg = err!.localizedDescription
+                        withAnimation{ self.error.toggle()}
                         completion(false)
                         return
                     }
                     completion(true)
                 }
             } else {
+               
                 print("Enter a valid Room")
                 completion(false)
                 return
@@ -408,6 +426,8 @@ class LoginViewModel: ObservableObject {
                     
                     if err != nil{
                         print(err!.localizedDescription)
+                        self.errorMsg = err!.localizedDescription
+                        withAnimation{ self.error.toggle()}
                         return
                     }
                     completion(true)
@@ -457,6 +477,8 @@ class LoginViewModel: ObservableObject {
         storage.child("assessments").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
             if err != nil {
                 print((err?.localizedDescription)!)
+                self.errorMsg = err!.localizedDescription
+                withAnimation{ self.error.toggle()}
                 completion(false)
                 return
             }
@@ -465,6 +487,8 @@ class LoginViewModel: ObservableObject {
                 
                 if err != nil {
                     print((err?.localizedDescription)!)
+                    self.errorMsg = err!.localizedDescription
+                    withAnimation{ self.error.toggle()}
                     completion(false)
                     return
                 }
@@ -475,6 +499,8 @@ class LoginViewModel: ObservableObject {
                     
                     if err != nil{
                         print(err!.localizedDescription)
+                        self.errorMsg = err!.localizedDescription
+                        withAnimation{ self.error.toggle()}
                         return
                     }
                     print("SUBMITTED!")
@@ -537,7 +563,10 @@ class LoginViewModel: ObservableObject {
             "marks": marks
         ]) { err in
             if let err = err {
+                self.errorMsg = err.localizedDescription
+                withAnimation{ self.error.toggle()}
                 print("Error updating document: \(err)")
+                
             } else {
                 print("Document successfully updated")
                 
@@ -553,6 +582,8 @@ class LoginViewModel: ObservableObject {
             if err != nil {
                 print((err?.localizedDescription)!)
                 completion(false)
+                self.errorMsg = err!.localizedDescription
+                withAnimation{ self.error.toggle()}
                 return
             }
             
@@ -560,6 +591,8 @@ class LoginViewModel: ObservableObject {
                 
                 if err != nil {
                     print((err?.localizedDescription)!)
+                    self.errorMsg = err!.localizedDescription
+                    withAnimation{ self.error.toggle()}
                     completion(false)
                     return
                 }
@@ -570,6 +603,8 @@ class LoginViewModel: ObservableObject {
                     
                     if err != nil{
                         print(err!.localizedDescription)
+                        self.errorMsg = err!.localizedDescription
+                        withAnimation{ self.error.toggle()}
                         return
                     }
                     print("CREATED!")

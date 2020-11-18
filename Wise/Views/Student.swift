@@ -494,7 +494,7 @@ struct AssesDetail: View {
     @State var openFile = false
     @State var showSubmit = false
     @State var add = false
-    
+    @State var studAttach = false
     var body: some View {
             VStack {
                 
@@ -585,12 +585,38 @@ struct AssesDetail: View {
                 VStack {
                     
                     if loginData.submission.docUrl != "" {
-                        if loginData.submission.isGraded {
-                            Text("GRADED")
-                            
-                        } else {
-                            Text("Turned In")
-                        }
+                            VStack {
+                                HStack {
+                                    Spacer()
+                                    VStack(alignment: .leading) {
+                                        Text("OUT OF \(doc.maxMarks!)").foregroundColor(.gray).font(.caption)
+                                        if loginData.submission.isGraded {
+                                            Text("\(loginData.submission.marks!)").bold().foregroundColor(.green)
+                                            
+                                        } else {
+                                            Text("TURNED IN").bold().foregroundColor(.gray)
+                                        }
+                                    }
+                                }.padding()
+                                Spacer()
+                                Button(action: {
+                                    self.studAttach.toggle()
+                                }, label: {
+                                    Text("REVIEW SUBMISSION")
+                                        .bold()
+                                        .foregroundColor(.black)
+                                        .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                                        .buttonStyle(ScaleButtonStyle())
+                                        .background(Color("yellow"))
+                                        .cornerRadius(15)
+                                })
+                                .fullScreenCover(isPresented: self.$studAttach) {
+                                    PDFProvider(openFile: self.$studAttach, pdfUrlString: loginData.submission.docUrl!)
+                                }
+                                Spacer()
+                                
+                            }.padding()
+                           
                         
                     } else {
                         HStack {
