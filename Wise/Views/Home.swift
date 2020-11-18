@@ -146,6 +146,7 @@ struct ClassroomView: View {
     
     @ObservedObject var loginData: LoginViewModel
     @State var createRoom = false
+    @State var menu = false
     
     @State var width = UIScreen.main.bounds.width - 90
     @State var x = -UIScreen.main.bounds.width + 90
@@ -179,7 +180,7 @@ struct ClassroomView: View {
                         leading:
                             Button(action: {
                                 withAnimation{
-                                    x = 0
+                                    self.menu = true
                                 }
                             }) {
                                 Image(systemName: "gear")
@@ -204,30 +205,17 @@ struct ClassroomView: View {
                     }
                 }
             }
-            .overlay(Color.black.opacity(x == 0 ? 0.5 : 0).ignoresSafeArea(.all, edges: .vertical)
-                        .onTapGesture { withAnimation { x = -width } })
+            .bottomSheet(isPresented: self.$menu, height: UIScreen.main.bounds.height /  2) {
+                SideMenu(loginData: loginData)
+                    .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
+                    .offset(x: x)
+                    .edgesIgnoringSafeArea(.top)
+            }
             
-            SideMenu(loginData: loginData)
-                .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
-                .offset(x: x)
-                .edgesIgnoringSafeArea(.top)
+            
             
             
         }
-        //        .gesture(DragGesture().onChanged({ (value) in
-        //            withAnimation {
-        //                if value.translation.width > 0 {
-        //                    if x < 0 { x = -width + value.translation.width }
-        //                } else {
-        //                    if x != -width { x = value.translation.width }
-        //                }
-        //            }
-        //        }).onEnded({ (value) in
-        //            withAnimation {
-        //                if -x < width / 2 { x = 0 }
-        //                else { x = -width }
-        //            }
-        //        }))
         
     }
 }

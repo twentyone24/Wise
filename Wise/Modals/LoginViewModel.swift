@@ -332,7 +332,7 @@ class LoginViewModel: ObservableObject {
         let param: Attendence = Attendence(isAccepted: false, name: name, phone: self.phNo)
         let dbRef = db.collection("Rooms").document(id)
         dbRef.getDocument { (document, error) in
-            if document!.exists {
+            if document != nil && document!.exists {
                 let _ = try!  self.db.collection("Rooms/\(id)/Attendence").document(self.phNo).setData(from: param) { (err) in
                     
                     if err != nil{
@@ -420,7 +420,7 @@ class LoginViewModel: ObservableObject {
     }
     
     @Published var resources: [Attachments] = []
-    //MARK: GET RESOURCES (S)
+    //MARK: GET RESOURCES (*)
     func getResources(id: String) {
         self.resources = []
         db.collection("Rooms/\(id)/Attachments").order(by: "sentAt", descending: true).addSnapshotListener { (querySnapshot, err) in
@@ -433,7 +433,8 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    //MARK: ASSESSMENTS ()
+    
+    //MARK: ASSESSMENTS (*)
     @Published var assessments: [Assessments] = []
     func getAssessments(id: String) {
         self.assessments = []
@@ -449,7 +450,8 @@ class LoginViewModel: ObservableObject {
         }
     }
     
-    func submitAssessments(id: String, data: URL, name: String, completion : @escaping (Bool)-> Void) {
+    //MARK: SUBMIT ASSESSMENT (S)
+    func submitAssessments(id: String, docID: String, data: URL, name: String, completion : @escaping (Bool)-> Void) {
         let storage = Storage.storage().reference()
         
         storage.child("assessments").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
@@ -467,9 +469,9 @@ class LoginViewModel: ObservableObject {
                     return
                 }
                 
-                let dbRef = self.db.collection("Rooms/\(id)/Assesments/submissions")
+                let dbRef = self.db.collection("Rooms/\(id)/Assesments/\(docID)/submissions")
                 let param: Submission = Submission(isGraded: false, name: name, submAt: Date(), docUrl: "\(url!)")
-                let _ = try! dbRef.document("submissions").setData(from: param) { (err) in
+                let _ = try! dbRef.document(self.phNo).setData(from: param) { (err) in
                     
                     if err != nil{
                         print(err!.localizedDescription)
@@ -485,7 +487,65 @@ class LoginViewModel: ObservableObject {
         
     }
     
+    //MARK:
+    @Published var submission: Submission = Submission(isGraded: false, name: "", submAt: Date(), docUrl: "")
+    func checkAssessment(id: String, docID: String) {
+        submission = Submission(isGraded: false, name: "", submAt: Date(), docUrl: "")
+        let dbRef = self.db.collection("Rooms/\(id)/Assesments/\(docID)/submissions").document(self.phNo)
+        
+            dbRef.addSnapshotListener { (document, error) in
+                if error == nil {
+                    if document != nil && document!.exists {
+                        do {
+                            let data = try document?.data(as: Submission.self)
+                            self.submission = data!
+                            //completion(true)
+                        } catch {
+                            print("Error decoding JSON: \(error)")
+                           // completion(false)
+                            return
+                        }
+                        
+                    }
+                }
+                //completion(false)
+            }
+    }
     
+    //MARK: LIST OF ALL SUBMISSIONS (T)
+    @Published var studentAsses: [Submission] = []
+    func getStudentAsses(id: String, docID: String) {
+        self.studentAsses = []
+        let dbRef = self.db.collection("Rooms/\(id)/Assesments/\(docID)/submissions").order(by: "submAt", descending: true)
+        
+        dbRef.addSnapshotListener { (querySnapshot, err) in
+            guard let docs = querySnapshot?.documents else { return }
+            
+            self.studentAsses = docs.compactMap { (queryDocumentSnapshot) -> Submission? in
+                return try? queryDocumentSnapshot.data(as: Submission.self)
+                
+            }
+        }
+    }
+    
+    //MARK: GRADE INDIVIDUAL STUDENT (T)
+    func grade(id: String, docID: String, student: String, marks: Int) {
+
+        let dbRef = self.db.collection("Rooms/\(id)/Assesments/\(docID)/submissions").document(student)
+        dbRef.updateData([
+            "isGraded": true,
+            "marks": marks
+        ]) { err in
+            if let err = err {
+                print("Error updating document: \(err)")
+            } else {
+                print("Document successfully updated")
+                
+            }
+        }
+    }
+    
+    //MARK: CREATE ASSESSMENT (T)
     func createAssessments(id: String, data: URL, name: String, due: Date, title: String, desc: String, points: Int, completion : @escaping (Bool)-> Void) {
         let storage = Storage.storage().reference()
         

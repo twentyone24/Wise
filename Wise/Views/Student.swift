@@ -13,7 +13,7 @@ struct studentRoom: View {
     @ObservedObject var loginData: LoginViewModel
     @State var joinRoom = false
     @State var id = ""
-    
+    @State var menu = false
     @State var width = UIScreen.main.bounds.width - 90
     @State var x = -UIScreen.main.bounds.width + 90
     
@@ -46,7 +46,7 @@ struct studentRoom: View {
                         leading:
                             Button(action: {
                                 withAnimation{
-                                    x = 0
+                                    self.menu = true
                                 }
                             }) {
                                 Image(systemName: "gear")
@@ -73,13 +73,12 @@ struct studentRoom: View {
             }
             
         }
-//        .overlay(Color.black.opacity(x == 0 ? 0.5 : 0).ignoresSafeArea(.all, edges: .vertical)
-//                    .onTapGesture { withAnimation { x = -width } })
-//
-//        SideMenu(loginData: loginData)
-//            .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
-//            .offset(x: x)
-//            .edgesIgnoringSafeArea(.top)
+        .bottomSheet(isPresented: self.$menu, height: UIScreen.main.bounds.height /  2) {
+            SideMenu(loginData: loginData)
+                .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
+                .offset(x: x)
+                .edgesIgnoringSafeArea(.top)
+        }
     }
     
     func joinRoomDialog() -> some View {
@@ -252,7 +251,7 @@ struct studRoomDetail: View {
             self.loginData.messages(id: id)
             self.loginData.studentRequests(id: id)
             self.loginData.getResources(id: id)
-            loginData.getAssessments(id: id)
+            self.loginData.getAssessments(id: id)
         }
     }
     
@@ -344,7 +343,7 @@ struct studRoomDetail: View {
             }
             
             Spacer()
-        }
+        }.contentShape(Rectangle())
     }
     
     var Assessments: some View {
@@ -375,7 +374,8 @@ struct studRoomDetail: View {
                     }
                 }
             }
-        }
+            Spacer()
+        }.contentShape(Rectangle())
     }
     
     
@@ -514,7 +514,7 @@ struct AssesDetail: View {
                         
                         
                     }.padding()
-                    
+                    .onAppear() { loginData.checkAssessment(id: id, docID: doc.id!) }
                     
                     Spacer()
                     
@@ -543,7 +543,7 @@ struct AssesDetail: View {
                 .background(Color.gray.cornerRadius(10))
                 
                 Capsule()
-                    .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/).foregroundColor(.yellow).padding(.top)
+                    .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
                 
                 
                 Button(action: {
@@ -579,39 +579,75 @@ struct AssesDetail: View {
                         .cornerRadius(15)
                 })
                 
-            }.bottomSheet(isPresented: self.$showSubmit, height: UIScreen.main.bounds.height / 3, showTopIndicator: true) {
+            }
+            
+            .bottomSheet(isPresented: self.$showSubmit, height: UIScreen.main.bounds.height / 3, showTopIndicator: true) {
                 VStack {
-                    Capsule()
-                        .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
                     
-                    
-                    Button(action: {
-                        self.add.toggle()
-                    }, label: {
-                        Text("SUBMIT ASSESMENT")
-                            .bold()
-                            .foregroundColor(.black)
-                            .frame(width: UIScreen.main.bounds.width - 50,height: 50)
-                            .buttonStyle(ScaleButtonStyle())
-                            .background(Color("yellow"))
-                            .cornerRadius(15)
-                    })
-                    .padding(15)
-                    .fileImporter(isPresented: $add, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
-                        do {
-                            let fileUrl = try res.get()
-                            loginData.submitAssessments(id: id, data: fileUrl, name: loginData.user.name ?? " ") { (stat) in
-                                if stat {
-                                    self.add.toggle()
+                    if loginData.submission.docUrl != "" {
+                        if loginData.submission.isGraded {
+                            Text("GRADED")
+                            
+                        } else {
+                            Text("Turned In")
+                        }
+                        
+                    } else {
+                        HStack {
+                            Spacer()
+                            
+                            VStack(alignment: .trailing) {
+                                Text("Due").font(.caption).foregroundColor(.gray)
+                                Text("\(doc.submTime.getFormattedDate(format: "MMM d, h:mm a"))"
+                                ).bold().foregroundColor( .red)
+                            }.padding(.horizontal, 15)
+                            
+                        }.padding(.horizontal, 15)
+                        Spacer()
+                        if doc.submTime < Date() {
+                            Text("YOU CANNOT SUBMIT YOUR ASSIGNMENT NOW.").bold()
+                                .foregroundColor(.red).padding(.horizontal).multilineTextAlignment(.center)
+                            Button(action: {}, label: {
+                                Text("SUBMIT ASSESMENT")
+                                    .bold()
+                                    .foregroundColor(.gray)
+                                    .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                                    .buttonStyle(ScaleButtonStyle())
+                                    .background(BlurBG())
+                                    .cornerRadius(15)
+                            }).disabled(true)
+                            .padding(15)
+                        } else {
+                        Button(action: {
+                            self.add.toggle()
+                        }, label: {
+                            Text("SUBMIT ASSESMENT")
+                                .bold()
+                                .foregroundColor(.black)
+                                .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                                .buttonStyle(ScaleButtonStyle())
+                                .background(Color("yellow"))
+                                .cornerRadius(15)
+                        })
+                        .padding(15)
+                        .fileImporter(isPresented: $add, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
+                            do {
+                                let fileUrl = try res.get()
+                                loginData.submitAssessments(id: id, docID: doc.id!, data: fileUrl, name: loginData.user.name ?? " ") { (stat) in
+                                    if stat {
+                                        self.showSubmit.toggle()
+                                    }
                                 }
+                            } catch {
+                                print(error.localizedDescription)
                             }
-                        } catch {
-                            print(error.localizedDescription)
                         }
                     }
+                        Spacer()
+                    }
                     
-                    Capsule()
-                        .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/).foregroundColor(.yellow).padding(.bottom)
+                    
+                    
                 }
             }
             

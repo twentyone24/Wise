@@ -96,7 +96,7 @@ struct createRoom: View {
                 .padding(15)
             
             Button(action: {
-                loginData.createRoom(rname: self.roomName, rsubj: self.desc, code: "ofcb1")
+                loginData.createRoom(rname: self.roomName, rsubj: self.desc, code: "ofdb1")
                 self.show.toggle()
             }, label: {
                 Text("Create Room")
@@ -171,7 +171,7 @@ struct uploadDocument: View {
                     let fileUrl = try res.get()
                     loginData.uploadResource(data: fileUrl, id: id, desc: desc, title: title, sentBy: loginData.user.name ?? " ") { (stat) in
                         if stat {
-                            self.show.toggle()
+                            self.show = false
                         }
                     }
                 } catch {
@@ -186,6 +186,106 @@ struct uploadDocument: View {
     
 }
 
+struct createAssess: View {
+    
+    @Binding var show: Bool
+    @ObservedObject var loginData: LoginViewModel
+    @State var id: String
+    
+    @State var title: String = ""
+    @State var desc: String = ""
+    @State var openFile = false
+    @State var fileUrl: URL?
+    @State var due: Date = Date()
+    
+    @State var submit = false
+    
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Button(action: {
+                    self.show.toggle()
+                }) {
+                    Image(systemName: "arrow.left")
+                        .font(.title2)
+                        .foregroundColor(.black)
+                }
+                Spacer()
+            }.padding()
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Title").padding(.horizontal).font(.caption)
+                TextField("title", text: self.$title)
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+                
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Description").padding(.horizontal).font(.caption)
+                TextField("Description", text: self.$desc)
+                    .padding()
+                    .background(BlurBG())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+            }
+            
+            HStack {
+                Button { openFile.toggle() } label: {
+                    Text("Add Attachments")
+                        .bold()
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
+                        .padding()
+                }
+                .background(Color("theme"))
+                .cornerRadius(15)
+                .padding(15)
+                .fileImporter(isPresented: $openFile, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
+                    do {
+                        self.fileUrl = try res.get()
+                        
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Due:").font(.caption).foregroundColor(.gray)
+                    DatePicker("", selection: self.$due, displayedComponents: .date)
+                        .labelsHidden()
+                }.padding(.horizontal, 15)
+            }
+            
+            Spacer()
+            
+            
+            Button(action: {
+                loginData.createAssessments(id: id, data: fileUrl!, name: loginData.user.name ?? " ", due: due, title: title, desc: desc, points: 10) { (stat) in
+                    if stat {
+                        self.show.toggle()
+                    }
+                }
+            }, label: {
+                    Text("Create Assessment")
+                        .bold()
+                        .font(.system(size: 18))
+                        .foregroundColor(.white)
+                        .padding()
+                })
+                .background(Color("theme"))
+                .cornerRadius(15)
+                .padding(15)
+                
+            
+            
+            
+        }
+    }
+}
 
 struct teacherRoomDetail: View {
     
@@ -243,7 +343,7 @@ struct teacherRoomDetail: View {
                     Button(action: {
                         self.ind = 3
                     }) {
-                        Text("Attendance")
+                        Text("Assessments")
                             .font(.system(size: 15))
                             .foregroundColor(ind == 3 ? .white : Color("text"))
                             .fontWeight(.bold)
@@ -251,18 +351,31 @@ struct teacherRoomDetail: View {
                             .padding(.horizontal,10)
                             .background(Color("theme").opacity(ind == 3 ? 1 : 0))
                             .clipShape(TabBarShape())
+                        
                     }
                     Button(action: {
                         self.ind = 4
                     }) {
-                        
-                        Text("Students")
+                        Text("Attendance")
                             .font(.system(size: 15))
                             .foregroundColor(ind == 4 ? .white : Color("text"))
                             .fontWeight(.bold)
                             .padding(.vertical,6)
                             .padding(.horizontal,10)
                             .background(Color("theme").opacity(ind == 4 ? 1 : 0))
+                            .clipShape(TabBarShape())
+                    }
+                    Button(action: {
+                        self.ind = 5
+                    }) {
+                        
+                        Text("Students")
+                            .font(.system(size: 15))
+                            .foregroundColor(ind == 5 ? .white : Color("text"))
+                            .fontWeight(.bold)
+                            .padding(.vertical,6)
+                            .padding(.horizontal,10)
+                            .background(Color("theme").opacity(ind == 5 ? 1 : 0))
                             .clipShape(TabBarShape())
                     }
                 }
@@ -280,8 +393,10 @@ struct teacherRoomDetail: View {
                 case 2 :
                     Discussion
                 case 3 :
-                    Attendance
+                    Assessments
                 case 4 :
+                    Attendance
+                case 5 :
                     Students
                 default:
                     Overview
@@ -311,6 +426,7 @@ struct teacherRoomDetail: View {
             self.loginData.messages(id: id)
             self.loginData.studentRequests(id: id)
             self.loginData.getResources(id: id)
+            self.loginData.getAssessments(id: id)
         }
     }
     
@@ -451,6 +567,53 @@ struct teacherRoomDetail: View {
     }
     
     
+    @State var openFile1: Bool = false
+    var Assessments: some View {
+        VStack(alignment: .leading) {
+            
+            if loginData.assessments.count != 0 {
+                ScrollView(.vertical, showsIndicators: false) {
+                    ForEach(loginData.assessments, id: \.self) { i in
+                        NavigationLink(destination: TeacherAssesDetail(id: id, loginData: loginData,doc: i)) {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(i.title).bold()
+                                    
+                                }
+                                Spacer()
+                                
+                                VStack(alignment: .leading) {
+                                    Text("Due:").foregroundColor(.gray)
+                                    Text(
+                                        i.submTime < Date() ? "ENDED" : "\(i.submTime.getFormattedDate(format: "MMM d, h:mm a"))"
+                                    ).bold().foregroundColor(i.submTime < Date() ? .red : .green)
+                                }
+                            }.padding()
+                            .background(BlurBG())
+                            .cornerRadius(15)
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+            }
+            Spacer()
+            
+            Button { openFile1.toggle() } label: {
+                Text("Add Assessment")
+                    .bold()
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+            }
+            .background(Color("theme"))
+            .cornerRadius(15)
+            .padding(15)
+        }
+        .contentShape(Rectangle())
+        .fullScreenCover(isPresented: self.$openFile1) {
+            Wise.createAssess(show: self.$openFile1, loginData: loginData, id: id)
+        }
+    }
     
     
     
@@ -660,20 +823,7 @@ struct ResourceDetail: View {
                     .cornerRadius(15)
             })
             .fullScreenCover(isPresented: self.$openFile) {
-//                VStack {
-//                HStack {
-//                    Button(action: {
-//                        self.openFile.toggle()
-//                    }) {
-//                        Image(systemName: "arrow.left")
-//                            .font(.title2)
-//                            .foregroundColor(.black)
-//                    }
-//                    Spacer()
-//                }.padding()
                 PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
-                    //PDFKitView(url: Foundation.URL(string: doc.docUrl!))
-                //}
             }
             
             Spacer()
@@ -681,4 +831,158 @@ struct ResourceDetail: View {
         }.padding()
     }
     
+}
+
+struct TeacherAssesDetail: View {
+    
+    @State var id: String
+    @ObservedObject var loginData: LoginViewModel
+    @State var doc: Assessments
+    @State var openFile = false
+    @State var showSubmit = false
+    @State var add = false
+    
+    
+    
+    var body: some View {
+        VStack {
+            
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(doc.title)
+                        .font(.title)
+                        .bold()
+                    //.padding()
+                    
+                    Text("Assigned on").font(.caption).foregroundColor(.gray)
+                    Text("\(doc.addedAt.getFormattedDate(format: "MMM d, h:mm a"))")
+                        .font(.caption)
+                        .bold()
+                        .background(BlurBG())
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    
+                    
+                }.padding()
+                .onAppear() { loginData.checkAssessment(id: id, docID: doc.id!) }
+                
+                Spacer()
+                
+                VStack(alignment: .leading) {
+                    Text("Due:").font(.caption).foregroundColor(.gray)
+                    Text(
+                        doc.submTime < Date() ? "ENDED" : "\(doc.submTime.getFormattedDate(format: "MMM d, h:mm a"))"
+                    ).bold().foregroundColor(doc.submTime < Date() ? .red : .green)
+                }.padding(.horizontal, 15)
+                
+            }.padding(.horizontal, 15)
+            
+            Text("Description").bold().font(.caption)
+            VStack(alignment: .leading, spacing: 0) {
+                
+                Text(doc.desc!)
+                    .multilineTextAlignment(/*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/)
+                    .font(.system(size: 15))
+                    .padding(10)
+                
+            }
+            
+            .frame(width: UIScreen.main.bounds.width - 50)
+            .background(Color.white.cornerRadius(10))
+            .padding(1.2)
+            .background(Color.gray.cornerRadius(10))
+            
+            Capsule()
+                .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
+            
+            
+            Button(action: {
+                self.openFile.toggle()
+            }, label: {
+                Text("VIEW ATTACHMENTS")
+                    .bold()
+                    .foregroundColor(.black)
+                    .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                    .buttonStyle(ScaleButtonStyle())
+                    .background(Color("yellow"))
+                    .cornerRadius(15)
+            })
+            .fullScreenCover(isPresented: self.$openFile) {
+                PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+            }
+            
+            Capsule()
+                .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.bottom)
+            
+            
+            Spacer()
+            
+            Button(action: {
+                self.showSubmit.toggle()
+            }, label: {
+                Text("VIEW STUDENTS")
+                    .bold()
+                    .foregroundColor(.black)
+                    .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                    .buttonStyle(ScaleButtonStyle())
+                    .background(Color("yellow"))
+                    .cornerRadius(15)
+                
+            }).padding()
+            
+        }
+        .onAppear() {
+            loginData.getStudentAsses(id: id, docID: doc.id!) }
+        
+        .fullScreenCover(isPresented: self.$showSubmit) {
+            VStack(alignment: .leading) {
+                HStack {
+                    Button(action: {
+                        self.showSubmit.toggle()
+                    }) {
+                        Image(systemName: "arrow.left")
+                            .font(.title2)
+                            .foregroundColor(.black)
+                    }
+                    Spacer()
+                }.padding()
+                
+                if loginData.studentAsses.count != 0 {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        ForEach(loginData.studentAsses, id: \.self) { i in
+                            Button(action: {
+                                
+                            }) {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(i.name).bold()
+                                            Text(i.id!).foregroundColor(.gray)
+                                        }
+                                        Spacer()
+                                        
+                                        VStack(alignment: .leading) {
+                                            Text("Due:").foregroundColor(.gray)
+                                            Text(
+                                                i.isGraded ? "MARKS" : "GRADE"
+                                            ).bold().foregroundColor(i.isGraded ? .gray : .red)
+                                        }
+                                    }.padding()
+                                    .background(BlurBG())
+                                    .cornerRadius(15)
+                                    .padding(.horizontal)
+                                }
+                                    
+                                
+                            }
+                        }
+                    }
+                    Spacer()
+                    
+                    
+                }
+            }
+            
+            
+            
+        
+    }
 }
