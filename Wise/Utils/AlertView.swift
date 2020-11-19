@@ -93,3 +93,21 @@ struct AlertView: View {
     }
 }
 
+func msgHUD(msg: String, logo: String = "antenna.radiowaves.left.and.right") -> some View {
+    HStack(spacing: 10) {
+        Image(systemName: logo)
+            .font(.system(size: 15))
+            .foregroundColor(.red)
+        Text(msg)
+            .font(.system(size: 15))
+            .foregroundColor(.gray)
+    }
+    .cornerRadius(30.0)
+    .padding(.horizontal, 10)
+    .padding(14)
+    .background(
+        BlurView(style: .systemMaterial)
+            .clipShape(Capsule())
+            .shadow(color: Color(.black).opacity(0.22), radius: 12, x: 0, y: 5)
+    )
+}

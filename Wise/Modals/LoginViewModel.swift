@@ -46,7 +46,7 @@ class LoginViewModel: ObservableObject {
     
     func sendCode(){
         
-        Auth.auth().settings?.isAppVerificationDisabledForTesting = true
+        //Auth.auth().settings?.isAppVerificationDisabledForTesting = true
         
         let number = "+\(getCountryCode())\(phNo)"
         PhoneAuthProvider.provider().verifyPhoneNumber(number, uiDelegate: nil) { (CODE, err) in
@@ -75,10 +75,15 @@ class LoginViewModel: ObservableObject {
                 self.errorMsg = error.localizedDescription
                 withAnimation{ self.error.toggle() }
                 completion(false)
+                return
+            }
+            else {
+                completion(true)
+                return
             }
             //withAnimation{ self.status = true }
         }
-        completion(true)
+        
     }
     
     func requestCode() {
@@ -229,6 +234,8 @@ class LoginViewModel: ObservableObject {
                 self.errorMsg = err.localizedDescription
                 withAnimation{ self.error.toggle()}
             } else {
+                self.HUDMsg = "Request Denied"
+                withAnimation{ self.HUD.toggle()}
                 print("Document successfully removed!")
             }
         }
@@ -251,7 +258,9 @@ class LoginViewModel: ObservableObject {
                             print("Error updating document: \(err)")
                             return
                         } else {
-                            print("Room id added in users.")
+                            print("Removed User")
+                            self.HUDMsg = "Removed Student"
+                            withAnimation{ self.HUD.toggle()}
                         }
                     }
             }
@@ -279,6 +288,8 @@ class LoginViewModel: ObservableObject {
                             print("Error updating document: \(err)")
                             return
                         } else {
+                            self.HUDMsg = "Student Added"
+                            withAnimation{ self.HUD.toggle()}
                             print("Room id added in users.")
                         }
                     }
@@ -311,7 +322,7 @@ class LoginViewModel: ObservableObject {
     
     //MARK: CREATE ROOMS (T)
     func createRoom(rname: String, rsubj: String, code: String) {
-        
+        self.loading = true
         let docData: [String: Any] = [
             "createdBy" : self.phNo,
             "createdAt" : Date(),
@@ -322,21 +333,34 @@ class LoginViewModel: ObservableObject {
         ]
         
         db.collection("Rooms").document(code).setData(docData) { err in
+            self.loading = false
             if let err = err {
                 print("Error writing document: \(err)")
+                self.errorMsg = err.localizedDescription
+                withAnimation{ self.error.toggle()}
                 return
             } else {
-                self.db.collection("users")
-                    .document(self.phNo).updateData([ "rooms": FieldValue.arrayUnion([code]) ]) { err in
-                        if let err = err {
-                            print("Error updating document: \(err)")
-                            self.errorMsg = err.localizedDescription
-                            withAnimation{ self.error.toggle()}
-                            return
-                        } else {
-                            print("Document successfully updated")
-                        }
-                    }
+                self.HUDMsg = "Room Created"
+                withAnimation{ self.HUD.toggle()}
+                print("Document successfully updated")
+                
+            
+            }
+        }
+    }
+    
+    func checkReq(id: String, completion : @escaping (Bool)-> Void) {
+        print("CHECL")
+        let docRef = db.collection("Rooms/\(id)/Attendence").document(self.phNo)
+        print(self.phNo)
+        print(id)
+        docRef.getDocument { (document, error) in
+            if document != nil && document!.exists {
+                print("Document data: \(document!.data()!)")
+                completion(true)
+            } else {
+                print("Document does not exist")
+                completion(false)
             }
         }
     }
@@ -348,19 +372,33 @@ class LoginViewModel: ObservableObject {
         let dbRef = db.collection("Rooms").document(id)
         dbRef.getDocument { (document, error) in
             if document != nil && document!.exists {
-                let _ = try!  self.db.collection("Rooms/\(id)/Attendence").document(self.phNo).setData(from: param) { (err) in
-                    
-                    if err != nil{
-                        print(err!.localizedDescription)
-                        self.errorMsg = err!.localizedDescription
-                        withAnimation{ self.error.toggle()}
+                self.checkReq(id: id) { (stat) in
+                    if !stat {
+                        let _ = try!  self.db.collection("Rooms/\(id)/Attendence").document(self.phNo).setData(from: param) { (err) in
+                            
+                            if err != nil{
+                                print(err!.localizedDescription)
+                                self.HUDMsg = err!.localizedDescription
+                                withAnimation{ self.HUD.toggle()}
+                                completion(false)
+                                return
+                            }
+                            self.HUDMsg = "Requested"
+                            withAnimation{ self.HUD.toggle()}
+                            completion(true)
+                        }
+                    } else {
+                        self.HUDMsg = "Already Requested"
+                        withAnimation{ self.HUD.toggle()}
+                        
                         completion(false)
                         return
                     }
-                    completion(true)
+                    
                 }
             } else {
-               
+                self.HUDMsg = "Room doesn't Exist"
+                withAnimation{ self.HUD.toggle()}
                 print("Enter a valid Room")
                 completion(false)
                 return
@@ -406,7 +444,7 @@ class LoginViewModel: ObservableObject {
     //MARK: UPLOAD ATTACHMENTS (T)
     func uploadResource(data: URL, id: String, desc: String, title: String, sentBy: String, completion : @escaping (Bool)-> Void) {
         let storage = Storage.storage().reference()
-        
+        self.loading = true
         storage.child("resources").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
             if err != nil {
                 print((err?.localizedDescription)!)
@@ -423,13 +461,15 @@ class LoginViewModel: ObservableObject {
                 
                 let param: Attachments = Attachments(sentAt: Date(), desc: desc, docUrl: "\(url!)", sentBy: sentBy, title: title)
                 let _ = try! self.db.collection("Rooms/\(id)/Attachments").addDocument(from: param) { (err) in
-                    
+                    self.loading = false
                     if err != nil{
                         print(err!.localizedDescription)
                         self.errorMsg = err!.localizedDescription
                         withAnimation{ self.error.toggle()}
                         return
                     }
+                    self.HUDMsg = "Uploaded Resource"
+                    withAnimation{ self.HUD.toggle()}
                     completion(true)
                     
                 }
@@ -473,7 +513,7 @@ class LoginViewModel: ObservableObject {
     //MARK: SUBMIT ASSESSMENT (S)
     func submitAssessments(id: String, docID: String, data: URL, name: String, completion : @escaping (Bool)-> Void) {
         let storage = Storage.storage().reference()
-        
+        self.loading = true
         storage.child("assessments").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
             if err != nil {
                 print((err?.localizedDescription)!)
@@ -496,7 +536,7 @@ class LoginViewModel: ObservableObject {
                 let dbRef = self.db.collection("Rooms/\(id)/Assesments/\(docID)/submissions")
                 let param: Submission = Submission(isGraded: false, name: name, submAt: Date(), docUrl: "\(url!)")
                 let _ = try! dbRef.document(self.phNo).setData(from: param) { (err) in
-                    
+                    self.loading = false
                     if err != nil{
                         print(err!.localizedDescription)
                         self.errorMsg = err!.localizedDescription
@@ -504,6 +544,8 @@ class LoginViewModel: ObservableObject {
                         return
                     }
                     print("SUBMITTED!")
+                    self.HUDMsg = "Turned In"
+                    withAnimation{ self.HUD.toggle()}
                     completion(true)
                     
                 }
@@ -568,6 +610,8 @@ class LoginViewModel: ObservableObject {
                 print("Error updating document: \(err)")
                 
             } else {
+                self.HUDMsg = "Graded"
+                withAnimation{ self.HUD.toggle()}
                 print("Document successfully updated")
                 
             }
@@ -577,7 +621,7 @@ class LoginViewModel: ObservableObject {
     //MARK: CREATE ASSESSMENT (T)
     func createAssessments(id: String, data: URL, name: String, due: Date, title: String, desc: String, points: Int, completion : @escaping (Bool)-> Void) {
         let storage = Storage.storage().reference()
-        
+        self.loading = true
         storage.child("assessments").child("\(data.lastPathComponent)").putFile(from: data, metadata: nil) { (_, err) in
             if err != nil {
                 print((err?.localizedDescription)!)
@@ -600,7 +644,7 @@ class LoginViewModel: ObservableObject {
                 let dbRef = self.db.collection("Rooms/\(id)/Assesments")
                 let param: Assessments = Assessments(addedAt: Date(), submTime: due, desc: desc, addedBy: name, docUrl: "\(url!)", title: title, maxMarks: points)
                 let _ = try! dbRef.addDocument(from: param) { (err) in
-                    
+                    self.loading = false
                     if err != nil{
                         print(err!.localizedDescription)
                         self.errorMsg = err!.localizedDescription
@@ -608,6 +652,8 @@ class LoginViewModel: ObservableObject {
                         return
                     }
                     print("CREATED!")
+                    self.HUDMsg = "Assesment Added"
+                    withAnimation{ self.HUD.toggle()}
                     completion(true)
                     
                 }

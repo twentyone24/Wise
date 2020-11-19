@@ -78,9 +78,12 @@ struct Verification: View {
                                     if check {
                                         withAnimation { loginData.status = true }
                                     } else {
+                                        
                                         self.next = true
                                     }
                                 }
+                            } else {
+                                print("WRNG CODE")
                             }
                         }
                         

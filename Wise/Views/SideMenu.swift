@@ -21,7 +21,7 @@ struct SideMenu: View {
             Spacer(minLength: 5)
             HStack {
                 if let dp = loginData.user.dp {
-                WebImage(url: Foundation.URL(string: dp)!)
+                WebImage(url: Foundation.URL(string: dp))
                     .resizable()
                     .scaledToFit()
                     .clipShape(Circle())

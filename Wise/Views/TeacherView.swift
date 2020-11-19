@@ -13,6 +13,7 @@ struct TeacherView: View {
     @ObservedObject var loginData: LoginViewModel
     @State var id: String = ""
     @State var createRoom = false
+    @State var menu = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -24,8 +25,17 @@ struct TeacherView: View {
                             .font(.largeTitle)
                             .fontWeight(.heavy)
                             .foregroundColor(.white)
-                            .offset(y: -40)
                         Spacer(minLength: 0)
+                        Button(action: {
+                            withAnimation{
+                                self.menu = true
+                            }
+                        }) {
+                            Image(systemName: "gear")
+                                .font(.system(size: 26))
+                                .foregroundColor(.white)
+                        }
+                        
                     }
                     .padding()
                     .padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
@@ -58,6 +68,9 @@ struct TeacherView: View {
                 ClassroomView(loginData: self.loginData)
             }
         }
+        .bottomSheet(isPresented: self.$menu, height: UIScreen.main.bounds.height /  2) {
+            SideMenu(loginData: loginData)
+        }
         
     }
 }
@@ -80,6 +93,7 @@ struct createRoom: View {
                         .foregroundColor(.black)
                 }
                 Spacer()
+                if loginData.loading { ProgressView() }
             }.padding()
             
             TextField("Room Name", text: self.$roomName)
@@ -96,17 +110,17 @@ struct createRoom: View {
                 .padding(15)
             
             Button(action: {
-                loginData.createRoom(rname: self.roomName, rsubj: self.desc, code: "ofdb1")
+                loginData.createRoom(rname: self.roomName, rsubj: self.desc, code: generateCode())
                 self.show.toggle()
             }, label: {
                 Text("Create Room")
-                    .foregroundColor(.black)
+                    .foregroundColor((roomName == "" || desc == "") ? .white : .black)
                     .frame(width: UIScreen.main.bounds.width - 30,height: 50)
                     .buttonStyle(ScaleButtonStyle())
-                    .background(Color("yellow"))
+                    .background((roomName == "" || desc == "") ? Color.black.opacity(0.35) : Color("yellow"))
                     .cornerRadius(15)
             })
-            .disabled(self.desc == "" && self.roomName == "" ? true: false)
+            .disabled(self.desc == "" || self.roomName == "" || loginData.loading)
             
             Spacer()
             
@@ -135,6 +149,7 @@ struct uploadDocument: View {
                         .foregroundColor(.black)
                 }
                 Spacer()
+                if loginData.loading{ ProgressView() }
             }.padding()
             
             VStack(alignment: .leading, spacing: 0) {
@@ -163,9 +178,10 @@ struct uploadDocument: View {
                     .foregroundColor(.white)
                     .padding()
             }
-            .background(Color("theme"))
+            .background((title == "" || desc == "") ? Color.black.opacity(0.35) : Color("theme"))
             .cornerRadius(15)
             .padding(15)
+            .disabled(title == "" || desc == "" || loginData.loading)
             .fileImporter(isPresented: $openFile, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
                 do {
                     let fileUrl = try res.get()
@@ -212,6 +228,7 @@ struct createAssess: View {
                         .foregroundColor(.black)
                 }
                 Spacer()
+                if loginData.loading{ ProgressView() }
             }.padding()
             
             VStack(alignment: .leading, spacing: 0) {
@@ -270,16 +287,17 @@ struct createAssess: View {
                     }
                 }
             }, label: {
-                    Text("Create Assessment")
-                        .bold()
-                        .font(.system(size: 18))
-                        .foregroundColor(.white)
-                        .padding()
-                })
-                .background(Color("theme"))
-                .cornerRadius(15)
-                .padding(15)
-                
+                Text("Create Assessment")
+                    .bold()
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+            })
+            .background((title == "" || desc == "") ? Color.black.opacity(0.35) : Color("theme"))
+            .cornerRadius(15)
+            .padding(15)
+            .disabled(title == "" || desc == "" || loginData.loading)
+            
             
             
             
@@ -295,6 +313,7 @@ struct teacherRoomDetail: View {
     
     @State var isRefresh = true
     @State var offset : CGFloat = UIScreen.main.bounds.width
+    @State var toast = false
     var body: some View {
         
         VStack {
@@ -439,13 +458,10 @@ struct teacherRoomDetail: View {
                     Text("Subject").bold().foregroundColor(Color("text"))
                     Text(loginData.roomDetail.subject!).foregroundColor(Color("text"))
                 }
-                HStack {
-                    Text("Timings").bold().foregroundColor(Color("text"))
-                    Text("PlaceHolder").foregroundColor(Color("text"))
-                }
+                
                 HStack {
                     Text("Stats").bold().foregroundColor(Color("text"))
-                    Text("PlaceHolder").foregroundColor(Color("text"))
+                    Text("\(loginData.roomDetail.students!.count) Students").foregroundColor(Color("text"))
                 }
                 
                 HStack {
@@ -477,8 +493,23 @@ struct teacherRoomDetail: View {
             .padding(.leading, 20)
             .padding(.trailing, 20)
             
-            Text("Classroom ID").foregroundColor(.gray)
-            Text(id.uppercased()).bold().font(.system(size: 24)).foregroundColor(Color("text"))
+            
+            Button(action: {
+                UIPasteboard.general.string = id.uppercased()
+                self.toast = true
+            }) {
+                HStack {
+                    VStack {
+                        Text(id.uppercased()).bold().font(.system(size: 24)).foregroundColor(Color("text"))
+                        Text("Classroom ID").foregroundColor(.gray)
+                    }
+                    
+                    Image(systemName: "doc.on.doc").font(.subheadline).foregroundColor(Color("text"))
+                    
+                }.padding()
+            }.popup(isPresented: $toast, type: .floater(), position: .top, animation: Animation.spring(), autohideIn: 2) {
+                msgHUD(msg: "Copied to clipboard", logo: "doc.on.doc")
+            }
             
             Button(action: {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -504,9 +535,9 @@ struct teacherRoomDetail: View {
         isShareSheetShowing.toggle()
         
         let text = """
-            You have been invited by () to join their classroom.
+            You have been invited by \(loginData.user.name ?? " ") to join their classroom.
 
-            Download the Wise App at
+            Download the App at
             https://studant.in
 
             Enroll in classroom by entering,
@@ -546,6 +577,13 @@ struct teacherRoomDetail: View {
                     }
                 }
                 
+            } else {
+                VStack(alignment: .center, spacing: 5) {
+                    Spacer()
+                    LottieView(fileName: "no" ).frame( height: UIScreen.main.bounds.height / 2)
+                    Text("NO RESOURCES ADDED").bold().foregroundColor(.gray).offset(y: -70)
+                    Spacer()
+                }
             }
             Spacer()
             
@@ -564,6 +602,8 @@ struct teacherRoomDetail: View {
         .fullScreenCover(isPresented: self.$openFile) {
             Wise.uploadDocument(show: self.$openFile, loginData: loginData, id: id)
         }
+        
+        
     }
     
     
@@ -595,6 +635,13 @@ struct teacherRoomDetail: View {
                         }
                     }
                 }
+            } else {
+                VStack(alignment: .center, spacing: 5) {
+                    Spacer()
+                    LottieView(fileName: "no" ).frame( height: UIScreen.main.bounds.height / 2)
+                    Text("NO ASSESMENT ASSIGNED").bold().foregroundColor(.gray).offset(y: -70)
+                    Spacer()
+                }
             }
             Spacer()
             
@@ -619,12 +666,13 @@ struct teacherRoomDetail: View {
     
     var Attendance: some View {
         VStack(alignment: .leading) {
-            Text("Pending Requests")
-                .bold()
-                .font(.system(size: 18))
-                .padding()
-            
             if loginData.students.count != 0 {
+                Text("Pending Requests")
+                    .bold()
+                    .font(.system(size: 18))
+                    .padding()
+                
+                
                 ForEach(loginData.students, id: \.self) { i in
                     if !i.isAccepted {
                         HStack {
@@ -651,8 +699,15 @@ struct teacherRoomDetail: View {
                         .padding(.horizontal)
                     }
                 }
-            }
-            
+                
+            } else {
+                VStack(alignment: .center, spacing: 5) {
+                    Spacer()
+                    LottieView(fileName: "no" ).frame( height: UIScreen.main.bounds.height / 2)
+                    Text("NO PENDING REQUESTS").bold().foregroundColor(.gray).offset(y: -70)
+                    Spacer()
+                }
+        }
             Spacer()
         }
         .contentShape(Rectangle())
@@ -663,6 +718,7 @@ struct teacherRoomDetail: View {
     
     var Students: some View {
         VStack(alignment: .leading) {
+            if loginData.students.count != 0 {
             HStack {
                 Text("Active Students")
                     .bold()
@@ -676,7 +732,7 @@ struct teacherRoomDetail: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }.padding()
             
-            if loginData.students.count != 0 {
+            
                 ForEach(loginData.students, id: \.self) { i in
                     if i.isAccepted {
                         HStack {
@@ -698,8 +754,14 @@ struct teacherRoomDetail: View {
                         
                     }
                 }
+            } else {
+                VStack(alignment: .center, spacing: 0) {
+                    Spacer()
+                    LottieView(fileName: "no" ).frame(height: UIScreen.main.bounds.height / 2)//.padding(.leading)
+                    Text("NO STUDENTS JOINED").bold().foregroundColor(.gray).offset(y: -70)
+                    Spacer()
+                }
             }
-            
             Spacer()
         }
         .contentShape(Rectangle())
@@ -776,7 +838,6 @@ struct ResourceDetail: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            
             VStack(alignment: .leading, spacing: 0) {
                 Text("Title").padding(.horizontal)
                 Text(doc.title!)
@@ -895,28 +956,29 @@ struct TeacherAssesDetail: View {
             .padding(1.2)
             .background(Color.gray.cornerRadius(10))
             
-            Capsule()
-                .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
-            
-            
-            Button(action: {
-                self.openFile.toggle()
-            }, label: {
-                Text("VIEW ATTACHMENTS")
-                    .bold()
-                    .foregroundColor(.black)
-                    .frame(width: UIScreen.main.bounds.width - 50,height: 50)
-                    .buttonStyle(ScaleButtonStyle())
-                    .background(Color("yellow"))
-                    .cornerRadius(15)
-            })
-            .fullScreenCover(isPresented: self.$openFile) {
-                PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+            if doc.docUrl != nil {
+                Capsule()
+                    .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
+                
+                
+                Button(action: {
+                    self.openFile.toggle()
+                }, label: {
+                    Text("VIEW ATTACHMENTS")
+                        .bold()
+                        .foregroundColor(.black)
+                        .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                        .buttonStyle(ScaleButtonStyle())
+                        .background(Color("yellow"))
+                        .cornerRadius(15)
+                })
+                    .fullScreenCover(isPresented: self.$openFile) {
+                    PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+                    }
+                
+                Capsule()
+                    .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.bottom)
             }
-            
-            Capsule()
-                .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.bottom)
-            
             
             Spacer()
             
@@ -986,7 +1048,7 @@ struct TeacherAssesDetail: View {
                     
                 }.bottomSheet(isPresented: self.$grade, height: UIScreen.main.bounds.height /  3) {
                     if studDet.isGraded {
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .center) {
                             Text("OUT OF \(doc.maxMarks!)").foregroundColor(.gray).font(.caption)
                             Text("\(studDet.marks!)").bold().foregroundColor(studDet.isGraded ? .green : .red)
                         }

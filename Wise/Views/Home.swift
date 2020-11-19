@@ -54,7 +54,7 @@ struct Student: View {
     
     @ObservedObject var loginData: LoginViewModel
     @State var id: String = ""
-    
+    @State var isShareSheetShowing = false
     var body: some View {
         ZStack {
             if loginData.rooms.count == 0 {
@@ -76,7 +76,7 @@ struct Student: View {
                         Text("Enter a class ID given by your teacher to enroll in a class.").bold().lineLimit(2).padding(5).font(.title3)
                         
                         TextField("Class ID", text: $id)
-                            .autocapitalization(.none)
+                            .textCase(.uppercase)
                             .padding()
                             .background(Color.black.opacity(0.06))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -84,7 +84,10 @@ struct Student: View {
                         HStack {
                             Button(action: {
                                 loginData.joinRoom(id: id, name: loginData.user.name ?? " ") { (stat) in
-                                    if stat { print("requested") }
+                                    if stat {
+                                        print("requested")
+                                        UIApplication.shared.endEditing()
+                                    }
                                     else { print("err") }
                                 }
                             }, label: {
@@ -101,10 +104,12 @@ struct Student: View {
                             .disabled(id == "" ? true: false)
                             
                             Button(action: {
-                                print("Or Invite Teacher")
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                shareButton()
                             }, label: {
                                 
-                                Text("Or Invite Teacher")
+                                Text("INVITE TEACHER")
+                                    .bold()
                                     .font(.title3)
                                     .foregroundColor(Color("yellow"))
                                     .padding(.vertical,8)
@@ -132,10 +137,34 @@ struct Student: View {
                     
                     Spacer()
                 }
+                .popup(isPresented: $loginData.HUD, type: .floater(), position: .top, animation: Animation.spring(), autohideIn: 2) {
+                    msgHUD(msg: loginData.HUDMsg)
+                }
             } else {
                 studentRoom(loginData: self.loginData)
             }
         }
+        
+        
+        
+    }
+    
+    func shareButton() {
+        
+        isShareSheetShowing.toggle()
+        
+        let text = """
+            You have been invited by \(loginData.user.name ?? " ") to take your classroom online.
+
+            Download the App at
+            https://studant.in
+
+            Enroll in classroom by entering,
+            Classroom ID: \(id)
+        """
+        let av = UIActivityViewController(activityItems: [text], applicationActivities: nil)
+        
+        UIApplication.shared.windows.first?.rootViewController?.present(av, animated: true, completion: nil)
         
     }
 }
@@ -148,11 +177,9 @@ struct ClassroomView: View {
     @State var createRoom = false
     @State var menu = false
     
-    @State var width = UIScreen.main.bounds.width - 90
-    @State var x = -UIScreen.main.bounds.width + 90
     
     var body: some View {
-        ZStack(alignment: Alignment(horizontal: .leading, vertical: .center)) {
+        ZStack(alignment: Alignment(horizontal: .center, vertical: .center)) {
             NavigationView {
                 ZStack(alignment: .bottomTrailing) {
                     ScrollView(.vertical, showsIndicators: false) {
@@ -207,9 +234,12 @@ struct ClassroomView: View {
             }
             .bottomSheet(isPresented: self.$menu, height: UIScreen.main.bounds.height /  2) {
                 SideMenu(loginData: loginData)
-                    .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
-                    .offset(x: x)
-                    .edgesIgnoringSafeArea(.top)
+            }
+            
+            
+            if loginData.error{
+                
+                AlertView(msg: loginData.errorMsg, show: $loginData.error)
             }
             
             

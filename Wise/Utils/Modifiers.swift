@@ -47,3 +47,9 @@ struct ChatBubble: Shape {
         return Path(path.cgPath)
     }
 }
+
+extension UIApplication {
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}

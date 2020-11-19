@@ -13,23 +13,48 @@ extension Int {
     }
 }
 
-func generateCode(phNo: String) -> String {
-    let date = Date().getFormattedDate(format: "HH:mm:ss.SSS")
-
-    let spTime = date.components(separatedBy: ".")
-    let spHMS = spTime[0].components(separatedBy: ":")
-    let tmp = String(Int(spHMS[0])! + Int(spHMS[1])! + Int(spHMS[2])!)
-    let p2 = tmp + spTime[1]
-
-    let phNo = 8667511746
-    let ph = phNo.digits
-    _ = Int(p2)!.digits
-    var code = [Character]()
-    for i in 0..<ph.count {
-        if ph[i] % 2 == 0 || i == ph.count || i == 5{ code.append(contentsOf: String(UnicodeScalar(ph[i] + 64)!)) }
-        else { code.append(contentsOf: String(ph[i])) }
-    }
+func generateCode() -> String {
+    let uid = UUID().uuidString[...4]
+    return "I" + uid
     
-    return "code"
-    
+}
+
+public extension String {
+  subscript(value: Int) -> Character {
+    self[index(at: value)]
+  }
+}
+
+public extension String {
+  subscript(value: NSRange) -> Substring {
+    self[value.lowerBound..<value.upperBound]
+  }
+}
+
+public extension String {
+  subscript(value: CountableClosedRange<Int>) -> Substring {
+    self[index(at: value.lowerBound)...index(at: value.upperBound)]
+  }
+
+  subscript(value: CountableRange<Int>) -> Substring {
+    self[index(at: value.lowerBound)..<index(at: value.upperBound)]
+  }
+
+  subscript(value: PartialRangeUpTo<Int>) -> Substring {
+    self[..<index(at: value.upperBound)]
+  }
+
+  subscript(value: PartialRangeThrough<Int>) -> Substring {
+    self[...index(at: value.upperBound)]
+  }
+
+  subscript(value: PartialRangeFrom<Int>) -> Substring {
+    self[index(at: value.lowerBound)...]
+  }
+}
+
+private extension String {
+  func index(at offset: Int) -> String.Index {
+    index(startIndex, offsetBy: offset)
+  }
 }

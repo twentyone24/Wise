@@ -14,11 +14,9 @@ struct studentRoom: View {
     @State var joinRoom = false
     @State var id = ""
     @State var menu = false
-    @State var width = UIScreen.main.bounds.width - 90
-    @State var x = -UIScreen.main.bounds.width + 90
     
     var body: some View {
-        ZStack(alignment: Alignment(horizontal: .leading, vertical: .center)) {
+        ZStack(alignment: Alignment(horizontal: .center, vertical: .center)) {
             NavigationView {
                 ZStack(alignment: .bottomTrailing) {
                     ScrollView(.vertical, showsIndicators: false) {
@@ -37,7 +35,7 @@ struct studentRoom: View {
                                 .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: -5)
                                 .cornerRadius(20)
                                 .padding(.horizontal)
-                            }
+                            }.disabled(joinRoom)
                         }
                     }
                     .padding(.top, 10)
@@ -56,6 +54,7 @@ struct studentRoom: View {
                     )
                     
                     Button(action: {
+                        self.id = ""
                         self.joinRoom.toggle()
                     }) {
                         Image(systemName: "plus.circle.fill")
@@ -67,17 +66,24 @@ struct studentRoom: View {
                             .offset(y: -20)
                     }
                     
-                }.popup(isPresented: self.$joinRoom, type: .`default`,animation: Animation.spring(), closeOnTap: false) {
+                    
+                   
+                }.onTapGesture {
+                    UIApplication.shared.endEditing() }
+                .popup(isPresented: self.$joinRoom, type: .`default`,animation: Animation.spring(), closeOnTap: false, closeOnTapOutside: true) {
                     joinRoomDialog()
                 }
+            }
+            
+            //nLottieHUD(fileName: "confetti" )
+                
+            .popup(isPresented: $loginData.HUD, type: .floater(), position: .top, animation: Animation.spring(), autohideIn: 2) {
+                msgHUD(msg: loginData.HUDMsg)
             }
             
         }
         .bottomSheet(isPresented: self.$menu, height: UIScreen.main.bounds.height /  2) {
             SideMenu(loginData: loginData)
-                .shadow(color: Color.black.opacity(x != 0 ? 0.1 : 0), radius: 5, x: 5, y: 0)
-                .offset(x: x)
-                .edgesIgnoringSafeArea(.top)
         }
     }
     
@@ -85,7 +91,7 @@ struct studentRoom: View {
         VStack(alignment: .leading, spacing: 5) {
             
             TextField("Class ID", text: $id)
-                .autocapitalization(.none)
+                .textCase(.uppercase)
                 .padding()
                 .background(Color.black.opacity(0.06))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -96,6 +102,7 @@ struct studentRoom: View {
                     loginData.joinRoom(id: id, name: loginData.user.name ?? " ") { (stat) in
                         if stat {
                             print("requested")
+                            UIApplication.shared.endEditing()
                             self.joinRoom = false
                         }
                         else { print("err") }
@@ -120,6 +127,10 @@ struct studentRoom: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
         .shadow(color: Color.black.opacity(0.08), radius: 5, x: 0, y: -5)
         .padding(.horizontal, 20)
+        .onDisappear() {
+            UIApplication.shared.endEditing()
+            self.id = ""
+        }
     }
 }
 
@@ -340,6 +351,13 @@ struct studRoomDetail: View {
                     }
                 }
                 
+            } else {
+                VStack(alignment: .center, spacing: 5) {
+                    Spacer()
+                    LottieView(fileName: "no" ).frame( height: UIScreen.main.bounds.height / 2)
+                    Text("NO RESOURCES ADDED").bold().foregroundColor(.gray).offset(y: -70)
+                    Spacer()
+                }
             }
             
             Spacer()
@@ -372,6 +390,13 @@ struct studRoomDetail: View {
                             .padding(.horizontal)
                         }
                     }
+                }
+            } else {
+                VStack(alignment: .center, spacing: 5) {
+                    Spacer()
+                    LottieView(fileName: "no" ).frame( height: UIScreen.main.bounds.height / 2)
+                    Text("NO ASSESSMENTS DUE").bold().foregroundColor(.gray).offset(y: -70)
+                    Spacer()
                 }
             }
             Spacer()
@@ -542,28 +567,27 @@ struct AssesDetail: View {
                 .padding(1.2)
                 .background(Color.gray.cornerRadius(10))
                 
-                Capsule()
-                    .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
-                
-                
-                Button(action: {
-                    self.openFile.toggle()
-                }, label: {
-                    Text("REFER ATTACHMENTS")
-                        .bold()
-                        .foregroundColor(.black)
-                        .frame(width: UIScreen.main.bounds.width - 50,height: 50)
-                        .buttonStyle(ScaleButtonStyle())
-                        .background(Color("yellow"))
-                        .cornerRadius(15)
-                })
-                .fullScreenCover(isPresented: self.$openFile) {
-                    PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+                if doc.docUrl != nil {
+                    Capsule()
+                        .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.top)
+                    Button(action: {
+                        self.openFile.toggle()
+                    }, label: {
+                        Text("REFER ATTACHMENTS")
+                            .bold()
+                            .foregroundColor(.black)
+                            .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                            .buttonStyle(ScaleButtonStyle())
+                            .background(Color("yellow"))
+                            .cornerRadius(15)
+                    })
+                    .fullScreenCover(isPresented: self.$openFile) {
+                        PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
+                    }
+                    
+                    Capsule()
+                        .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.bottom)
                 }
-                
-                Capsule()
-                    .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.bottom)
-                
                 
                 Spacer()
                 
@@ -644,31 +668,34 @@ struct AssesDetail: View {
                             }).disabled(true)
                             .padding(15)
                         } else {
-                        Button(action: {
-                            self.add.toggle()
-                        }, label: {
-                            Text("SUBMIT ASSESMENT")
-                                .bold()
-                                .foregroundColor(.black)
-                                .frame(width: UIScreen.main.bounds.width - 50,height: 50)
-                                .buttonStyle(ScaleButtonStyle())
-                                .background(Color("yellow"))
-                                .cornerRadius(15)
-                        })
-                        .padding(15)
-                        .fileImporter(isPresented: $add, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
-                            do {
-                                let fileUrl = try res.get()
-                                loginData.submitAssessments(id: id, docID: doc.id!, data: fileUrl, name: loginData.user.name ?? " ") { (stat) in
-                                    if stat {
-                                        self.showSubmit.toggle()
+                            if loginData.loading{ ProgressView() }
+                            else {
+                                Button(action: {
+                                    self.add.toggle()
+                                }, label: {
+                                    Text("SUBMIT ASSESMENT")
+                                        .bold()
+                                        .foregroundColor(.black)
+                                        .frame(width: UIScreen.main.bounds.width - 50,height: 50)
+                                        .buttonStyle(ScaleButtonStyle())
+                                        .background(Color("yellow"))
+                                        .cornerRadius(15)
+                                })
+                                .padding(15)
+                                .fileImporter(isPresented: $add, allowedContentTypes: [.pdf, .png, .jpeg]) { (res) in
+                                    do {
+                                        let fileUrl = try res.get()
+                                        loginData.submitAssessments(id: id, docID: doc.id!, data: fileUrl, name: loginData.user.name ?? " ") { (stat) in
+                                            if stat {
+                                                self.showSubmit.toggle()
+                                            }
+                                        }
+                                    } catch {
+                                        print(error.localizedDescription)
                                     }
                                 }
-                            } catch {
-                                print(error.localizedDescription)
                             }
                         }
-                    }
                         Spacer()
                     }
                     
@@ -676,9 +703,9 @@ struct AssesDetail: View {
                     
                 }
             }
-            
-            
-            
+        
+        
+        
         
     }
 }

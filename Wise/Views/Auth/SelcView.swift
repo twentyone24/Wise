@@ -43,7 +43,7 @@ struct SelcView: View {
                     
                     Spacer()
                     
-                    if loginData.loading{ProgressView()}
+                    if loginData.loading{ ProgressView() }
                 }
                 .padding()
                 
