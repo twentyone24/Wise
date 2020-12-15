@@ -39,7 +39,7 @@ struct TeacherView: View {
                     }
                     .padding()
                     .padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
-                    .background(Color("yellow"))
+                    .background(Color("theme"))
                     
                     VStack(alignment: .leading, spacing: 5) {
                         Spacer()
@@ -117,7 +117,7 @@ struct createRoom: View {
                     .foregroundColor((roomName == "" || desc == "") ? .white : .black)
                     .frame(width: UIScreen.main.bounds.width - 30,height: 50)
                     .buttonStyle(ScaleButtonStyle())
-                    .background((roomName == "" || desc == "") ? Color.black.opacity(0.35) : Color("yellow"))
+                    .background((roomName == "" || desc == "") ? Color.black.opacity(0.35) : Color("theme"))
                     .cornerRadius(15)
             })
             .disabled(self.desc == "" || self.roomName == "" || loginData.loading)
@@ -877,10 +877,10 @@ struct ResourceDetail: View {
                 self.openFile.toggle()
             }, label: {
                 Text("Open Document")
-                    .foregroundColor(.black)
+                    .foregroundColor(.white)
                     .frame(width: UIScreen.main.bounds.width - 30,height: 50)
                     .buttonStyle(ScaleButtonStyle())
-                    .background(Color("yellow"))
+                    .background(Color("theme"))
                     .cornerRadius(15)
             })
             .fullScreenCover(isPresented: self.$openFile) {
@@ -945,16 +945,16 @@ struct TeacherAssesDetail: View {
             VStack(alignment: .leading, spacing: 0) {
                 
                 Text(doc.desc!)
-                    .multilineTextAlignment(/*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/)
+                    .multilineTextAlignment(.leading)
                     .font(.system(size: 15))
                     .padding(10)
                 
             }
             
             .frame(width: UIScreen.main.bounds.width - 50)
-            .background(Color.white.cornerRadius(10))
-            .padding(1.2)
-            .background(Color.gray.cornerRadius(10))
+            .background(BlurBG().cornerRadius(10))
+            //.padding(1.2)
+            //.background(Color.gray.cornerRadius(10))
             
             if doc.docUrl != nil {
                 Capsule()
@@ -966,18 +966,20 @@ struct TeacherAssesDetail: View {
                 }, label: {
                     Text("VIEW ATTACHMENTS")
                         .bold()
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                         .buttonStyle(ScaleButtonStyle())
-                        .background(Color("yellow"))
+                        .background(Color("theme"))
                         .cornerRadius(15)
                 })
-                    .fullScreenCover(isPresented: self.$openFile) {
-                    PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!)
-                    }
                 
                 Capsule()
                     .frame(width: UIScreen.main.bounds.width - 50, height: 1.5, alignment: .center).foregroundColor(.yellow).padding(.bottom)
+                
+                NavigationLink(destination: PDFProvider(openFile: self.$openFile, pdfUrlString: doc.docUrl!),isActive: self.$openFile) {
+                    Text("")
+                        .hidden()
+                }
             }
             
             Spacer()
@@ -987,10 +989,10 @@ struct TeacherAssesDetail: View {
             }, label: {
                 Text("VIEW STUDENTS")
                     .bold()
-                    .foregroundColor(.black)
+                    .foregroundColor(.white)
                     .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                     .buttonStyle(ScaleButtonStyle())
-                    .background(Color("yellow"))
+                    .background(Color("theme"))
                     .cornerRadius(15)
                 
             }).padding()
@@ -1052,6 +1054,7 @@ struct TeacherAssesDetail: View {
                             Text("OUT OF \(doc.maxMarks!)").foregroundColor(.gray).font(.caption)
                             Text("\(studDet.marks!)").bold().foregroundColor(studDet.isGraded ? .green : .red)
                         }
+
                     } else {
                         VStack {
                             HStack {
@@ -1067,10 +1070,10 @@ struct TeacherAssesDetail: View {
                             }, label: {
                                 Text("REVIEW ATTACHMENTS")
                                     .bold()
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.white)
                                     .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                                     .buttonStyle(ScaleButtonStyle())
-                                    .background(Color("yellow"))
+                                    .background(Color("theme"))
                                     .cornerRadius(15)
                             })
                             .fullScreenCover(isPresented: self.$studAttach) {
@@ -1103,11 +1106,11 @@ struct TeacherAssesDetail: View {
                                 }, label: {
                                     Text("GRADE")
                                         .bold()
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.white)
                                         .padding(.horizontal, 40)
                                         .frame(height: 55)
                                         .buttonStyle(ScaleButtonStyle())
-                                        .background(Color("yellow"))
+                                        .background(Color("theme"))
                                         .cornerRadius(15)
                                         .padding(.trailing)
                                 })
@@ -1115,6 +1118,7 @@ struct TeacherAssesDetail: View {
                                 
                             }.padding()
                         }.padding()
+                        
                     }
                 }
             }

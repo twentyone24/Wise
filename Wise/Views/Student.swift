@@ -110,11 +110,11 @@ struct studentRoom: View {
                 }, label: {
                     Text("Enroll")
                         .font(.title3)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .padding(.vertical,13)
                         .padding(.horizontal,28)
                         .buttonStyle(ScaleButtonStyle())
-                        .background(Color("yellow"))
+                        .background(Color("theme"))
                         .cornerRadius(15)
                 })
                 .disabled(id == "" ? true: false)
@@ -415,7 +415,7 @@ struct studRoomDetail: View {
                 Text("\(loginData.roomDetail.students?.count ?? 0)")
                     .bold()
                     .padding(.horizontal)
-                    .background(Color("Color"))
+                    .background(BlurBG())
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }.padding()
             
@@ -563,9 +563,9 @@ struct AssesDetail: View {
                 }
                 
                 .frame(width: UIScreen.main.bounds.width - 50)
-                .background(Color.white.cornerRadius(10))
-                .padding(1.2)
-                .background(Color.gray.cornerRadius(10))
+                .background(BlurBG().cornerRadius(10))
+                //.padding(1.2)
+               // .background(Color.gray.cornerRadius(10))
                 
                 if doc.docUrl != nil {
                     Capsule()
@@ -575,10 +575,10 @@ struct AssesDetail: View {
                     }, label: {
                         Text("REFER ATTACHMENTS")
                             .bold()
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
                             .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                             .buttonStyle(ScaleButtonStyle())
-                            .background(Color("yellow"))
+                            .background(Color("theme"))
                             .cornerRadius(15)
                     })
                     .fullScreenCover(isPresented: self.$openFile) {
@@ -596,10 +596,10 @@ struct AssesDetail: View {
                 }, label: {
                     Text("YOUR ASSESSMENT")
                         .bold()
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                         .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                         .buttonStyle(ScaleButtonStyle())
-                        .background(Color("yellow"))
+                        .background(Color("theme"))
                         .cornerRadius(15)
                 })
                 
@@ -628,10 +628,10 @@ struct AssesDetail: View {
                                 }, label: {
                                     Text("REVIEW SUBMISSION")
                                         .bold()
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.white)
                                         .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                                         .buttonStyle(ScaleButtonStyle())
-                                        .background(Color("yellow"))
+                                        .background(Color("theme"))
                                         .cornerRadius(15)
                                 })
                                 .fullScreenCover(isPresented: self.$studAttach) {
@@ -675,10 +675,10 @@ struct AssesDetail: View {
                                 }, label: {
                                     Text("SUBMIT ASSESMENT")
                                         .bold()
-                                        .foregroundColor(.black)
+                                        .foregroundColor(.white)
                                         .frame(width: UIScreen.main.bounds.width - 50,height: 50)
                                         .buttonStyle(ScaleButtonStyle())
-                                        .background(Color("yellow"))
+                                        .background(Color("theme"))
                                         .cornerRadius(15)
                                 })
                                 .padding(15)
@@ -703,9 +703,6 @@ struct AssesDetail: View {
                     
                 }
             }
-        
-        
-        
         
     }
 }

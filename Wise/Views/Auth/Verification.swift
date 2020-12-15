@@ -92,7 +92,7 @@ struct Verification: View {
                             .foregroundColor(.black)
                             .padding(.vertical)
                             .frame(width: UIScreen.main.bounds.width - 30)
-                            .background(Color("yellow"))
+                            .background(Color("theme"))
                             .cornerRadius(15)
                     }
                     .padding()

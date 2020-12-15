@@ -36,7 +36,7 @@ struct SideMenu: View {
                     Text(loginData.user.name!)
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.black)
+                        .foregroundColor(Color("text"))
                     Text(loginData.user.id!).fontWeight(.bold).foregroundColor(.gray)
                 }
                 
@@ -58,7 +58,7 @@ struct SideMenu: View {
             
             Spacer()
             
-        }//.frame(width: UIScreen.main.bounds.width / 0.5, alignment: .leading)
-        .background(Color.white)
+        }.frame(width: UIScreen.main.bounds.width)
+        .background(BlurBG())
     }
 }

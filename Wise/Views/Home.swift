@@ -70,7 +70,7 @@ struct Student: View {
                     }
                     .padding()
                     .padding(.top,UIApplication.shared.windows.first?.safeAreaInsets.top)
-                    .background(Color("yellow"))
+                    .background(Color("theme"))
                     
                     VStack(alignment: .leading, spacing: 5) {
                         Text("Enter a class ID given by your teacher to enroll in a class.").bold().lineLimit(2).padding(5).font(.title3)
@@ -98,7 +98,7 @@ struct Student: View {
                                     .padding(.vertical,13)
                                     .padding(.horizontal,28)
                                     .buttonStyle(ScaleButtonStyle())
-                                    .background(Color("yellow"))
+                                    .background(Color("theme"))
                                     .cornerRadius(15)
                             })
                             .disabled(id == "" ? true: false)
@@ -111,7 +111,7 @@ struct Student: View {
                                 Text("INVITE TEACHER")
                                     .bold()
                                     .font(.title3)
-                                    .foregroundColor(Color("yellow"))
+                                    .foregroundColor(Color("theme"))
                                     .padding(.vertical,8)
                                     .padding(.horizontal,8)
                             })

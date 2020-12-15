@@ -56,7 +56,7 @@ struct Login: View {
                             .foregroundColor(.black)
                             .frame(width: UIScreen.main.bounds.width - 30,height: 50)
                             .buttonStyle(ScaleButtonStyle())
-                            .background(Color("yellow"))
+                            .background(Color("theme"))
                             .cornerRadius(15)
                     })
                     .disabled(loginData.phNo == "" ? true: false)
